@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MindMapr Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .mindmap-container {
+      background: radial-gradient(circle at center, #1e293b, #0f172a);
+    }
+    .node {
+      transition: all 0.3s ease;
+    }
+    .node:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-white">
+  <nav class="bg-slate-800 border-b border-slate-700 p-4">
+    <div class="flex justify-between items-center">
+      <h1 class="text-xl font-bold text-emerald-400">MindMapr</h1>
+      <div class="flex items-center gap-4">
+        <button id="new-map" class="bg-emerald-500 hover:bg-emerald-400 px-4 py-2 rounded-lg transition">
+          + New Map
+        </button>
+        <button id="logout" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition">
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mindmap-container h-screen p-8">
+    <div id="mindmap" class="w-full h-full relative">
+      <!-- Mind map will be rendered here -->
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Your Firebase config here (same as index.html)
+    const firebaseConfig = {
+      apiKey: "your-api-key-here",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "your-app-id"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Check authentication
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        console.log("User logged in:", user.displayName);
+      }
+    });
+
+    // Logout functionality
+    document.getElementById('logout').addEventListener('click', () => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    });
+  </script>
+</body>
+</html>

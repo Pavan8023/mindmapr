@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>MindMapr Dashboard</title>
@@ -9,32 +10,250 @@
     .mindmap-container {
       background: radial-gradient(circle at center, #1e293b, #0f172a);
     }
+
     .node {
       transition: all 0.3s ease;
+      cursor: pointer;
     }
+
     .node:hover {
       transform: scale(1.05);
     }
+
+    .connection {
+      stroke: #4f46e5;
+      stroke-width: 2;
+    }
+
+    .comment-enter {
+      animation: commentSlide 0.3s ease-out;
+    }
+
+    @keyframes commentSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-white">
+
+<body class="bg-slate-900 text-white min-h-screen">
+  <!-- Navigation -->
   <nav class="bg-slate-800 border-b border-slate-700 p-4">
     <div class="flex justify-between items-center">
-      <h1 class="text-xl font-bold text-emerald-400">MindMapr</h1>
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-bold text-emerald-400">MindMapr</h1>
+        <span class="text-sm text-slate-400">Programming & College Q/A Platform</span>
+      </div>
       <div class="flex items-center gap-4">
-        <button id="new-map" class="bg-emerald-500 hover:bg-emerald-400 px-4 py-2 rounded-lg transition">
-          + New Map
-        </button>
-        <button id="logout" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition">
+        <div class="flex items-center gap-3 bg-slate-700/50 px-3 py-1 rounded-lg">
+          <img id="user-avatar" class="w-6 h-6 rounded-full border border-emerald-400" src="" alt="Profile">
+          <span id="user-name" class="text-sm font-medium"></span>
+        </div>
+        <button id="logout" class="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-lg transition text-sm">
           Logout
         </button>
       </div>
     </div>
   </nav>
 
-  <div class="mindmap-container h-screen p-8">
-    <div id="mindmap" class="w-full h-full relative">
-      <!-- Mind map will be rendered here -->
+  <!-- Main Content -->
+  <div class="flex h-[calc(100vh-80px)]">
+    <!-- Left Side - Live Questions Feed (50%) -->
+    <div class="w-1/2 border-r border-slate-700 p-6 overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-white">Live Questions Feed</h2>
+        <div class="flex gap-2">
+          <select id="category-filter" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+            <option value="all">All Categories</option>
+            <option value="web-development">Web Development</option>
+            <option value="data-structures">Data Structures</option>
+            <option value="algorithms">Algorithms</option>
+            <option value="database">Database</option>
+            <option value="college">College Related</option>
+            <option value="other">Other</option>
+          </select>
+          <select id="sort-questions" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Live Questions Grid -->
+      <div id="questions-container" class="grid gap-4">
+        <!-- Questions will be dynamically loaded here -->
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-questions" class="text-center py-8">
+        <div class="inline-flex items-center gap-2 text-slate-400">
+          <div class="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+          Loading questions...
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Question Form (50%) -->
+    <div class="w-1/2 p-6 bg-slate-800/50 h-full overflow-y-auto">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold text-white mb-6">Ask a Programming Question</h2>
+
+        <!-- Question Form -->
+        <form id="question-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Question Title</label>
+            <input type="text" id="question-title"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              placeholder="e.g., How to implement binary search in JavaScript?" required>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Category</label>
+            <select id="question-category"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              required>
+              <option value="">Select a category</option>
+              <option value="web-development">Web Development</option>
+              <option value="data-structures">Data Structures</option>
+              <option value="algorithms">Algorithms</option>
+              <option value="database">Database</option>
+              <option value="college">College Related</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Question Description</label>
+            <textarea id="question-description"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent h-32"
+              placeholder="Describe your question in detail..." required></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Code Example (Optional)</label>
+            <textarea id="question-code"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent h-24 font-mono text-sm"
+              placeholder="// Add your code here..."></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button type="submit" id="submit-question"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+              <span>Submit Question</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button type="button" id="clear-form"
+              class="px-6 py-3 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-lg transition">
+              Clear
+            </button>
+          </div>
+        </form>
+
+        <!-- Edit Form (Hidden by default) -->
+        <form id="edit-question-form" class="space-y-4 hidden mt-8">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-emerald-400">Edit Question</h3>
+            <button type="button" id="cancel-edit" class="text-slate-400 hover:text-white">Cancel</button>
+          </div>
+          <input type="hidden" id="edit-question-id">
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Question Title</label>
+            <input type="text" id="edit-question-title"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Category</label>
+            <select id="edit-question-category"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              required>
+              <option value="web-development">Web Development</option>
+              <option value="data-structures">Data Structures</option>
+              <option value="algorithms">Algorithms</option>
+              <option value="database">Database</option>
+              <option value="college">College Related</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Question Description</label>
+            <textarea id="edit-question-description"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent h-32"
+              required></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">Code Example</label>
+            <textarea id="edit-question-code"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent h-24 font-mono text-sm"></textarea>
+          </div>
+          <div class="flex gap-3">
+            <button type="submit"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-lg transition">
+              Update Question
+            </button>
+            <button type="button" id="delete-question"
+              class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition">
+              Delete
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment Modal -->
+  <div id="comment-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-800 rounded-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+      <div class="p-6 border-b border-slate-700">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-white">Question Discussion</h3>
+          <button id="close-comment-modal" class="text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div id="comment-question-content" class="mt-4">
+          <!-- Question content will be loaded here -->
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="comments-container" class="space-y-4">
+          <!-- Comments will be loaded here -->
+        </div>
+        <div id="no-comments" class="text-center py-8 text-slate-400 hidden">
+          <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <p>No comments yet. Be the first to comment!</p>
+        </div>
+      </div>
+
+      <div class="p-6 border-t border-slate-700">
+        <form id="comment-form" class="flex gap-3">
+          <input type="hidden" id="comment-question-id">
+          <div class="flex-1">
+            <input type="text" id="comment-text"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              placeholder="Write your comment..." required>
+          </div>
+          <button type="submit"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg transition font-medium">
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -42,35 +261,559 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script>
-    // Your Firebase config here (same as index.html)
     const firebaseConfig = {
-      apiKey: "your-api-key-here",
-      authDomain: "your-project.firebaseapp.com",
-      projectId: "your-project-id",
-      storageBucket: "your-project.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "your-app-id"
+      apiKey: "AIzaSyB24FGLvbQTDNmAH_YO60V_r4ynEhpxIJs",
+      authDomain: "mindmapr-638c1.firebaseapp.com",
+      projectId: "mindmapr-638c1",
+      storageBucket: "mindmapr-638c1.firebasestorage.app",
+      messagingSenderId: "886840058208",
+      appId: "1:886840058208:web:330a3433d1ab036c663e05",
+      measurementId: "G-F9R3TQ3262"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Check authentication
+    let currentUser = null;
+    let questionsListener = null;
+    let commentsListener = null;
+    let currentQuestionId = null;
+
+    // DOM Elements
+    const userAvatar = document.getElementById('user-avatar');
+    const userName = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout');
+    const questionsContainer = document.getElementById('questions-container');
+    const loadingQuestions = document.getElementById('loading-questions');
+    const questionForm = document.getElementById('question-form');
+    const editQuestionForm = document.getElementById('edit-question-form');
+    const categoryFilter = document.getElementById('category-filter');
+    const sortQuestions = document.getElementById('sort-questions');
+    const commentModal = document.getElementById('comment-modal');
+    const closeCommentModal = document.getElementById('close-comment-modal');
+    const commentQuestionContent = document.getElementById('comment-question-content');
+    const commentsContainer = document.getElementById('comments-container');
+    const noComments = document.getElementById('no-comments');
+    const commentForm = document.getElementById('comment-form');
+    const commentQuestionId = document.getElementById('comment-question-id');
+    const commentText = document.getElementById('comment-text');
+
+    // Check authentication and load user data
     auth.onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = "index.html";
       } else {
-        console.log("User logged in:", user.displayName);
+        currentUser = user;
+        loadUserData(user);
+        setupQuestionsListener();
       }
     });
 
-    // Logout functionality
-    document.getElementById('logout').addEventListener('click', () => {
+    // Load user data from Firestore
+    async function loadUserData(user) {
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userName.textContent = userData.displayName || user.email;
+          userAvatar.src = userData.photoURL || 'https://via.placeholder.com/32?text=U';
+        } else {
+          userName.textContent = user.displayName || user.email;
+          userAvatar.src = user.photoURL || 'https://via.placeholder.com/32?text=U';
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        userName.textContent = user.email;
+        userAvatar.src = 'https://via.placeholder.com/32?text=U';
+      }
+    }
+
+    // Setup real-time listener for ALL questions (multi-user)
+    function setupQuestionsListener() {
+      if (questionsListener) {
+        questionsListener(); // Unsubscribe from previous listener
+      }
+
+      let query = db.collection('questions').orderBy('createdAt', 'desc');
+
+      // Apply category filter
+      if (categoryFilter.value !== 'all') {
+        query = query.where('category', '==', categoryFilter.value);
+      }
+
+      // Apply sorting
+      if (sortQuestions.value === 'oldest') {
+        query = query.orderBy('createdAt', 'asc');
+      }
+
+      questionsListener = query.onSnapshot((snapshot) => {
+        loadingQuestions.classList.add('hidden');
+        questionsContainer.innerHTML = '';
+
+        if (snapshot.empty) {
+          questionsContainer.innerHTML = `
+            <div class="text-center py-12 text-slate-400">
+              <svg class="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              <p class="text-lg mb-2">No questions yet</p>
+              <p class="text-sm">Be the first to ask a question!</p>
+            </div>
+          `;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const question = doc.data();
+          displayQuestion(doc.id, question);
+        });
+      }, (error) => {
+        console.error('Error loading questions:', error);
+        loadingQuestions.innerHTML = '<div class="text-rose-400">Error loading questions</div>';
+      });
+    }
+
+    // Display a question in the container
+    function displayQuestion(id, question) {
+      const questionElement = document.createElement('div');
+      questionElement.className = 'bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition';
+      questionElement.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex items-center gap-2">
+            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
+              ${getCategoryLabel(question.category)}
+            </span>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <img src="${question.userPhotoURL || 'https://via.placeholder.com/20?text=U'}" 
+                   class="w-4 h-4 rounded-full" alt="User">
+              <span>${question.userName || question.userEmail}</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openComments('${id}')" class="text-slate-400 hover:text-indigo-400 transition flex items-center gap-1 text-xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              Comment
+            </button>
+            ${question.userId === currentUser.uid ? `
+              <button onclick="editQuestion('${id}')" class="text-slate-400 hover:text-emerald-400 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button onclick="deleteQuestion('${id}')" class="text-slate-400 hover:text-rose-400 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+        <h3 class="font-semibold text-white mb-2">${question.title}</h3>
+        <p class="text-slate-300 text-sm mb-3">${question.description}</p>
+        ${question.code ? `
+          <div class="bg-slate-900 rounded p-3 mb-3">
+            <pre class="text-sm text-emerald-400 font-mono overflow-x-auto"><code>${question.code}</code></pre>
+          </div>
+        ` : ''}
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>${formatDate(question.createdAt?.toDate())}</span>
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            ${question.createdAt?.toDate().toLocaleTimeString()}
+          </span>
+        </div>
+      `;
+      questionsContainer.appendChild(questionElement);
+    }
+
+    // Open comments modal
+    window.openComments = async function (questionId) {
+      currentQuestionId = questionId;
+      commentQuestionId.value = questionId;
+
+      try {
+        // Load question details
+        const questionDoc = await db.collection('questions').doc(questionId).get();
+        if (questionDoc.exists) {
+          const question = questionDoc.data();
+          commentQuestionContent.innerHTML = `
+            <div class="bg-slate-700/50 rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
+                  ${getCategoryLabel(question.category)}
+                </span>
+                <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
+              </div>
+              <h4 class="font-semibold text-white mb-2">${question.title}</h4>
+              <p class="text-slate-300 text-sm">${question.description}</p>
+              ${question.code ? `
+                <div class="bg-slate-800 rounded p-3 mt-3">
+                  <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${question.code}</code></pre>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        // Load comments
+        loadComments(questionId);
+
+        // Show modal
+        commentModal.classList.remove('hidden');
+        commentText.focus();
+      } catch (error) {
+        console.error('Error opening comments:', error);
+        showNotification('Error loading comments', 'error');
+      }
+    };
+
+    // Load comments for a question
+    function loadComments(questionId) {
+      if (commentsListener) {
+        commentsListener(); // Unsubscribe from previous listener
+      }
+
+      commentsListener = db.collection('questions').doc(questionId)
+        .collection('comments')
+        .orderBy('createdAt', 'asc')
+        .onSnapshot((snapshot) => {
+          commentsContainer.innerHTML = '';
+
+          if (snapshot.empty) {
+            noComments.classList.remove('hidden');
+            return;
+          }
+
+          noComments.classList.add('hidden');
+
+          snapshot.forEach((doc) => {
+            const comment = doc.data();
+            displayComment(doc.id, comment);
+          });
+
+          // Scroll to bottom
+          commentsContainer.scrollTop = commentsContainer.scrollHeight;
+        }, (error) => {
+          console.error('Error loading comments:', error);
+        });
+    }
+
+    // Display a comment
+    function displayComment(id, comment) {
+      const commentElement = document.createElement('div');
+      commentElement.className = 'comment-enter bg-slate-700/30 rounded-lg p-4 border border-slate-600';
+      commentElement.innerHTML = `
+        <div class="flex items-start gap-3">
+          <img src="${comment.userPhotoURL || 'https://via.placeholder.com/32?text=U'}" 
+               class="w-8 h-8 rounded-full border border-slate-500" alt="User">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-sm text-white">${comment.userName || comment.userEmail}</span>
+              <span class="text-xs text-slate-400">${formatTime(comment.createdAt?.toDate())}</span>
+            </div>
+            <p class="text-slate-200 text-sm">${comment.text}</p>
+          </div>
+        </div>
+      `;
+      commentsContainer.appendChild(commentElement);
+    }
+
+    // Submit new comment
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = commentText.value.trim();
+      if (!text) return;
+
+      const submitBtn = commentForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+
+      submitBtn.innerHTML = 'Sending...';
+      submitBtn.disabled = true;
+
+      try {
+        const commentData = {
+          text: text,
+          userId: currentUser.uid,
+          userName: currentUser.displayName || currentUser.email,
+          userEmail: currentUser.email,
+          userPhotoURL: currentUser.photoURL || '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('questions').doc(currentQuestionId)
+          .collection('comments')
+          .add(commentData);
+
+        // Clear comment input
+        commentText.value = '';
+
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+        showNotification('Error submitting comment', 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Close comment modal
+    closeCommentModal.addEventListener('click', () => {
+      commentModal.classList.add('hidden');
+      if (commentsListener) {
+        commentsListener();
+        commentsListener = null;
+      }
+    });
+
+    // Submit new question
+    questionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submit-question');
+      const originalText = submitBtn.innerHTML;
+
+      submitBtn.innerHTML = `
+        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        Submitting...
+      `;
+      submitBtn.disabled = true;
+
+      try {
+        const questionData = {
+          title: document.getElementById('question-title').value,
+          category: document.getElementById('question-category').value,
+          description: document.getElementById('question-description').value,
+          code: document.getElementById('question-code').value,
+          userId: currentUser.uid,
+          userName: currentUser.displayName || currentUser.email,
+          userEmail: currentUser.email,
+          userPhotoURL: currentUser.photoURL || '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('questions').add(questionData);
+
+        // Reset form
+        questionForm.reset();
+
+        // Show success message
+        showNotification('Question submitted successfully!', 'success');
+      } catch (error) {
+        console.error('Error submitting question:', error);
+        showNotification('Error submitting question. Please try again.', 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Edit question
+    window.editQuestion = async function (questionId) {
+      try {
+        const questionDoc = await db.collection('questions').doc(questionId).get();
+        if (questionDoc.exists) {
+          const question = questionDoc.data();
+
+          // Populate edit form
+          document.getElementById('edit-question-id').value = questionId;
+          document.getElementById('edit-question-title').value = question.title;
+          document.getElementById('edit-question-category').value = question.category;
+          document.getElementById('edit-question-description').value = question.description;
+          document.getElementById('edit-question-code').value = question.code || '';
+
+          // Show edit form, hide new question form
+          questionForm.classList.add('hidden');
+          editQuestionForm.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error loading question for edit:', error);
+        showNotification('Error loading question for editing', 'error');
+      }
+    };
+
+    // Update question
+    editQuestionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const questionId = document.getElementById('edit-question-id').value;
+      const submitBtn = editQuestionForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+
+      submitBtn.innerHTML = 'Updating...';
+      submitBtn.disabled = true;
+
+      try {
+        const updatedData = {
+          title: document.getElementById('edit-question-title').value,
+          category: document.getElementById('edit-question-category').value,
+          description: document.getElementById('edit-question-description').value,
+          code: document.getElementById('edit-question-code').value,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('questions').doc(questionId).update(updatedData);
+
+        // Switch back to new question form
+        cancelEdit();
+        showNotification('Question updated successfully!', 'success');
+      } catch (error) {
+        console.error('Error updating question:', error);
+        showNotification('Error updating question. Please try again.', 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Delete question
+    window.deleteQuestion = async function (questionId) {
+      if (confirm('Are you sure you want to delete this question?')) {
+        try {
+          // Delete all comments first
+          const commentsSnapshot = await db.collection('questions').doc(questionId)
+            .collection('comments').get();
+
+          const deletePromises = commentsSnapshot.docs.map(doc => doc.ref.delete());
+          await Promise.all(deletePromises);
+
+          // Delete the question
+          await db.collection('questions').doc(questionId).delete();
+          showNotification('Question deleted successfully!', 'success');
+        } catch (error) {
+          console.error('Error deleting question:', error);
+          showNotification('Error deleting question. Please try again.', 'error');
+        }
+      }
+    };
+
+    // Cancel edit
+    document.getElementById('cancel-edit').addEventListener('click', cancelEdit);
+    document.getElementById('delete-question').addEventListener('click', function () {
+      const questionId = document.getElementById('edit-question-id').value;
+      deleteQuestion(questionId);
+      cancelEdit();
+    });
+
+    function cancelEdit() {
+      editQuestionForm.classList.add('hidden');
+      questionForm.classList.remove('hidden');
+      editQuestionForm.reset();
+    }
+
+    // Clear form
+    document.getElementById('clear-form').addEventListener('click', () => {
+      questionForm.reset();
+    });
+
+    // Filter and sort events
+    categoryFilter.addEventListener('change', setupQuestionsListener);
+    sortQuestions.addEventListener('change', setupQuestionsListener);
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         window.location.href = "index.html";
       });
     });
+
+    // Utility functions
+    function getCategoryColor(category) {
+      const colors = {
+        'web-development': 'bg-blue-500/20 text-blue-300',
+        'data-structures': 'bg-purple-500/20 text-purple-300',
+        'algorithms': 'bg-emerald-500/20 text-emerald-300',
+        'database': 'bg-amber-500/20 text-amber-300',
+        'college': 'bg-rose-500/20 text-rose-300',
+        'other': 'bg-slate-500/20 text-slate-300'
+      };
+      return colors[category] || colors.other;
+    }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        'web-development': 'Web Development',
+        'data-structures': 'Data Structures',
+        'algorithms': 'Algorithms',
+        'database': 'Database',
+        'college': 'College',
+        'other': 'Other'
+      };
+      return labels[category] || 'Other';
+    }
+
+    function formatDate(date) {
+      if (!date) return '';
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function formatTime(date) {
+      if (!date) return '';
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function showNotification(message, type = 'info') {
+      // Remove existing notification
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      const notification = document.createElement('div');
+      notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-emerald-600 text-white' :
+          type === 'error' ? 'bg-rose-600 text-white' :
+            'bg-slate-700 text-white'
+        }`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Close modal on outside click
+    commentModal.addEventListener('click', (e) => {
+      if (e.target === commentModal) {
+        commentModal.classList.add('hidden');
+        if (commentsListener) {
+          commentsListener();
+          commentsListener = null;
+        }
+      }
+    });
+
+    // Prevent form submission on Enter key in textareas
+    document.querySelectorAll('textarea').forEach(textarea => {
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+          e.preventDefault();
+          const form = textarea.closest('form');
+          if (form) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              submitBtn.click();
+            }
+          }
+        }
+      });
+    });
   </script>
 </body>
+
 </html>

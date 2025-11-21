@@ -1,14 +1,17 @@
 const express = require('express');
-const Comment = require('../models/comment');
+const Comment = require('../models/comments'); // Fixed import
 const router = express.Router();
 
 // Get comments for a question
 router.get('/:questionId', async (req, res) => {
   try {
+    console.log('📥 GET Comments for question:', req.params.questionId);
     const comments = await Comment.find({ questionId: req.params.questionId })
       .sort({ createdAt: 1 });
+    console.log(`✅ Found ${comments.length} comments`);
     res.json(comments);
   } catch (error) {
+    console.error('❌ Error fetching comments:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -16,6 +19,8 @@ router.get('/:questionId', async (req, res) => {
 // Add comment to question
 router.post('/', async (req, res) => {
   try {
+    console.log('📥 POST Comment request received:', req.body);
+    
     const commentData = {
       ...req.body,
       createdAt: new Date(),
@@ -23,9 +28,15 @@ router.post('/', async (req, res) => {
 
     const comment = new Comment(commentData);
     await comment.save();
+    
+    console.log('✅ Comment created successfully:', comment._id);
     res.status(201).json(comment);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('❌ Error creating comment:', error);
+    res.status(400).json({ 
+      message: 'Error creating comment',
+      error: error.message 
+    });
   }
 });
 

@@ -288,11 +288,11 @@
     const db = firebase.firestore();
 
     let currentUser = null;
-    let questionsListener = null;
-    let commentsListener = null;
     let currentQuestionId = null;
-    let onlineUsersListener = null;
-    let userPresenceRef = null;
+    let pollInterval = null;
+
+    // API Base URL - CHANGE THIS BASED ON YOUR ENVIRONMENT
+    const API_BASE_URL = 'http://localhost:5500/api'; // Development
 
     // DOM Elements
     const userAvatar = document.getElementById('user-avatar');
@@ -321,91 +321,11 @@
       } else {
         currentUser = user;
         loadUserData(user);
-        setupOnlinePresence();
         setupQuestionsListener();
       }
     });
 
-    function setupOnlinePresence() {
-  if (!currentUser) return;
-
-  userPresenceRef = db.collection('onlineUsers').doc(currentUser.uid);
-
-  // Set up connection state
-  const connectionRef = db.collection('connections').doc(currentUser.uid);
-  
-  // Set initial online status
-  const userData = {
-    uid: currentUser.uid,
-    email: currentUser.email,
-    displayName: currentUser.displayName || currentUser.email,
-    photoURL: currentUser.photoURL || '',
-    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-    status: 'online'
-  };
-
-  // Batch write for atomic operation
-  const batch = db.batch();
-  batch.set(userPresenceRef, userData);
-  batch.set(connectionRef, {
-    online: true,
-    lastActive: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  
-  batch.commit().then(() => {
-    // Set up disconnect cleanup
-    connectionRef.onDisconnect().update({
-      online: false,
-      lastActive: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    
-    userPresenceRef.onDisconnect().update({
-      status: 'offline',
-      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  });
-
-  // Listen for online users - FIXED QUERY
-  onlineUsersListener = db.collection('onlineUsers')
-    .where('status', '==', 'online')
-    .onSnapshot((snapshot) => {
-      if (!snapshot.empty) {
-        const onlineUsers = snapshot.size;
-        onlineCount.textContent = onlineUsers;
-      } else {
-        onlineCount.textContent = '1'; // At least current user
-      }
-    }, (error) => {
-      console.error('Online users listener error:', error);
-      onlineCount.textContent = '1';
-    });
-
-  // Update heartbeat every 20 seconds
-  const presenceInterval = setInterval(() => {
-    userPresenceRef.update({
-      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  }, 20000);
-
-  // Clean up
-  logoutBtn.addEventListener('click', () => {
-    clearInterval(presenceInterval);
-    if (userPresenceRef) {
-      userPresenceRef.update({
-        status: 'offline',
-        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-    if (connectionRef) {
-      connectionRef.update({
-        online: false,
-        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-  });
-}
-
-    // Load user data from Firestore
+    // Load user data from Firestore (keeping this for profile)
     async function loadUserData(user) {
       try {
         const userDoc = await db.collection('users').doc(user.uid).get();
@@ -424,35 +344,38 @@
       }
     }
 
-    // Setup real-time listener for ALL questions (multi-user)
+    // Setup polling for questions (replaces Firestore real-time listener)
     function setupQuestionsListener() {
-      if (questionsListener) {
-        questionsListener(); // Unsubscribe from previous listener
-      }
+      // Initial load
+      fetchQuestions();
+      
+      // Set up polling every 3 seconds for real-time updates
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(fetchQuestions, 3000);
+      
+      // Add event listeners for filters
+      categoryFilter.addEventListener('change', fetchQuestions);
+      sortQuestions.addEventListener('change', fetchQuestions);
+    }
 
-      let query = db.collection('questions');
-
-      // Apply category filter
-      if (categoryFilter.value !== 'all') {
-        query = query.where('category', '==', categoryFilter.value);
-      }
-
-      // Apply sorting based on selected option
-      if (sortQuestions.value === 'newest') {
-        query = query.orderBy('createdAt', 'desc');
-      } else if (sortQuestions.value === 'oldest') {
-        query = query.orderBy('createdAt', 'asc');
-      } else if (sortQuestions.value === 'category') {
-        query = query.orderBy('category', 'asc').orderBy('createdAt', 'desc');
-      } else {
-        query = query.orderBy('createdAt', 'desc'); // default
-      }
-
-      questionsListener = query.onSnapshot((snapshot) => {
+    // Fetch questions from MongoDB backend
+    async function fetchQuestions() {
+      try {
+        const category = categoryFilter.value;
+        const sort = sortQuestions.value;
+        
+        const response = await fetch(
+          `${API_BASE_URL}/questions?category=${category}&sort=${sort}`
+        );
+        
+        if (!response.ok) throw new Error('Failed to fetch questions');
+        
+        const questions = await response.json();
+        
         loadingQuestions.classList.add('hidden');
         questionsContainer.innerHTML = '';
-
-        if (snapshot.empty) {
+        
+        if (questions.length === 0) {
           questionsContainer.innerHTML = `
             <div class="text-center py-12 text-slate-400">
               <svg class="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,15 +387,14 @@
           `;
           return;
         }
-
-        snapshot.forEach((doc) => {
-          const question = doc.data();
-          displayQuestion(doc.id, question);
+        
+        questions.forEach((question) => {
+          displayQuestion(question._id, question);
         });
-      }, (error) => {
+      } catch (error) {
         console.error('Error loading questions:', error);
         loadingQuestions.innerHTML = '<div class="text-rose-400">Error loading questions</div>';
-      });
+      }
     }
 
     // Display a question in the container
@@ -520,12 +442,12 @@
           </div>
         ` : ''}
         <div class="text-xs text-slate-400 flex justify-between items-center">
-          <span>${formatDate(question.createdAt?.toDate())}</span>
+          <span>${formatDate(new Date(question.createdAt))}</span>
           <span class="flex items-center gap-1">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            ${question.createdAt?.toDate().toLocaleTimeString()}
+            ${new Date(question.createdAt).toLocaleTimeString()}
           </span>
         </div>
       `;
@@ -539,27 +461,27 @@
       
       try {
         // Load question details
-        const questionDoc = await db.collection('questions').doc(questionId).get();
-        if (questionDoc.exists) {
-          const question = questionDoc.data();
-          commentQuestionContent.innerHTML = `
-            <div class="bg-slate-700/50 rounded-lg p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
-                  ${getCategoryLabel(question.category)}
-                </span>
-                <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
-              </div>
-              <h4 class="font-semibold text-white mb-2">${question.title}</h4>
-              <p class="text-slate-300 text-sm">${question.description}</p>
-              ${question.code ? `
-                <div class="bg-slate-800 rounded p-3 mt-3">
-                  <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${question.code}</code></pre>
-                </div>
-              ` : ''}
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+        if (!response.ok) throw new Error('Failed to load question');
+        
+        const question = await response.json();
+        commentQuestionContent.innerHTML = `
+          <div class="bg-slate-700/50 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
+                ${getCategoryLabel(question.category)}
+              </span>
+              <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
             </div>
-          `;
-        }
+            <h4 class="font-semibold text-white mb-2">${question.title}</h4>
+            <p class="text-slate-300 text-sm">${question.description}</p>
+            ${question.code ? `
+              <div class="bg-slate-800 rounded p-3 mt-3">
+                <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${question.code}</code></pre>
+              </div>
+            ` : ''}
+          </div>
+        `;
 
         // Load comments
         loadComments(questionId);
@@ -574,34 +496,30 @@
     };
 
     // Load comments for a question
-    function loadComments(questionId) {
-      if (commentsListener) {
-        commentsListener(); // Unsubscribe from previous listener
-      }
-
-      commentsListener = db.collection('questions').doc(questionId)
-        .collection('comments')
-        .orderBy('createdAt', 'asc')
-        .onSnapshot((snapshot) => {
-          commentsContainer.innerHTML = '';
-          
-          if (snapshot.empty) {
-            noComments.classList.remove('hidden');
-            return;
-          }
-          
-          noComments.classList.add('hidden');
-          
-          snapshot.forEach((doc) => {
-            const comment = doc.data();
-            displayComment(doc.id, comment);
-          });
-          
-          // Scroll to bottom
-          commentsContainer.scrollTop = commentsContainer.scrollHeight;
-        }, (error) => {
-          console.error('Error loading comments:', error);
+    async function loadComments(questionId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/comments/${questionId}`);
+        if (!response.ok) throw new Error('Failed to load comments');
+        
+        const comments = await response.json();
+        commentsContainer.innerHTML = '';
+        
+        if (comments.length === 0) {
+          noComments.classList.remove('hidden');
+          return;
+        }
+        
+        noComments.classList.add('hidden');
+        comments.forEach((comment) => {
+          displayComment(comment._id, comment);
         });
+        
+        // Scroll to bottom
+        commentsContainer.scrollTop = commentsContainer.scrollHeight;
+      } catch (error) {
+        console.error('Error loading comments:', error);
+        noComments.classList.remove('hidden');
+      }
     }
 
     // Display a comment
@@ -615,7 +533,7 @@
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
               <span class="font-medium text-sm text-white">${comment.userName || comment.userEmail}</span>
-              <span class="text-xs text-slate-400">${formatTime(comment.createdAt?.toDate())}</span>
+              <span class="text-xs text-slate-400">${formatTime(new Date(comment.createdAt))}</span>
             </div>
             <p class="text-slate-200 text-sm">${comment.text}</p>
           </div>
@@ -644,15 +562,22 @@
           userName: currentUser.displayName || currentUser.email,
           userEmail: currentUser.email,
           userPhotoURL: currentUser.photoURL || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          questionId: currentQuestionId
         };
 
-        await db.collection('questions').doc(currentQuestionId)
-          .collection('comments')
-          .add(commentData);
+        const response = await fetch(`${API_BASE_URL}/comments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData),
+        });
+
+        if (!response.ok) throw new Error('Failed to submit comment');
         
-        // Clear comment input
+        // Clear comment input and refresh comments
         commentText.value = '';
+        await loadComments(currentQuestionId);
         
       } catch (error) {
         console.error('Error submitting comment:', error);
@@ -666,10 +591,6 @@
     // Close comment modal
     closeCommentModal.addEventListener('click', () => {
       commentModal.classList.add('hidden');
-      if (commentsListener) {
-        commentsListener();
-        commentsListener = null;
-      }
     });
 
     // Submit new question
@@ -694,18 +615,27 @@
           userId: currentUser.uid,
           userName: currentUser.displayName || currentUser.email,
           userEmail: currentUser.email,
-          userPhotoURL: currentUser.photoURL || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          userPhotoURL: currentUser.photoURL || ''
         };
 
-        await db.collection('questions').add(questionData);
+        const response = await fetch(`${API_BASE_URL}/questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(questionData),
+        });
+
+        if (!response.ok) throw new Error('Failed to submit question');
         
         // Reset form
         questionForm.reset();
         
         // Show success message
         showNotification('Question submitted successfully!', 'success');
+        
+        // Refresh questions list
+        fetchQuestions();
       } catch (error) {
         console.error('Error submitting question:', error);
         showNotification('Error submitting question. Please try again.', 'error');
@@ -718,21 +648,21 @@
     // Edit question
     window.editQuestion = async function(questionId) {
       try {
-        const questionDoc = await db.collection('questions').doc(questionId).get();
-        if (questionDoc.exists) {
-          const question = questionDoc.data();
-          
-          // Populate edit form
-          document.getElementById('edit-question-id').value = questionId;
-          document.getElementById('edit-question-title').value = question.title;
-          document.getElementById('edit-question-category').value = question.category;
-          document.getElementById('edit-question-description').value = question.description;
-          document.getElementById('edit-question-code').value = question.code || '';
-          
-          // Show edit form, hide new question form
-          questionForm.classList.add('hidden');
-          editQuestionForm.classList.remove('hidden');
-        }
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+        if (!response.ok) throw new Error('Failed to load question');
+        
+        const question = await response.json();
+        
+        // Populate edit form
+        document.getElementById('edit-question-id').value = questionId;
+        document.getElementById('edit-question-title').value = question.title;
+        document.getElementById('edit-question-category').value = question.category;
+        document.getElementById('edit-question-description').value = question.description;
+        document.getElementById('edit-question-code').value = question.code || '';
+        
+        // Show edit form, hide new question form
+        questionForm.classList.add('hidden');
+        editQuestionForm.classList.remove('hidden');
       } catch (error) {
         console.error('Error loading question for edit:', error);
         showNotification('Error loading question for editing', 'error');
@@ -756,13 +686,22 @@
           category: document.getElementById('edit-question-category').value,
           description: document.getElementById('edit-question-description').value,
           code: document.getElementById('edit-question-code').value,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          userId: currentUser.uid // For authorization check
         };
 
-        await db.collection('questions').doc(questionId).update(updatedData);
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) throw new Error('Failed to update question');
         
-        // Switch back to new question form
+        // Switch back to new question form and refresh questions
         cancelEdit();
+        fetchQuestions();
         showNotification('Question updated successfully!', 'success');
       } catch (error) {
         console.error('Error updating question:', error);
@@ -777,16 +716,18 @@
     window.deleteQuestion = async function(questionId) {
       if (confirm('Are you sure you want to delete this question?')) {
         try {
-          // Delete all comments first
-          const commentsSnapshot = await db.collection('questions').doc(questionId)
-            .collection('comments').get();
+          const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: currentUser.uid }),
+          });
+
+          if (!response.ok) throw new Error('Failed to delete question');
           
-          const deletePromises = commentsSnapshot.docs.map(doc => doc.ref.delete());
-          await Promise.all(deletePromises);
-          
-          // Delete the question
-          await db.collection('questions').doc(questionId).delete();
           showNotification('Question deleted successfully!', 'success');
+          fetchQuestions(); // Refresh the list
         } catch (error) {
           console.error('Error deleting question:', error);
           showNotification('Error deleting question. Please try again.', 'error');
@@ -813,19 +754,10 @@
       questionForm.reset();
     });
 
-    // Filter and sort events
-    categoryFilter.addEventListener('change', setupQuestionsListener);
-    sortQuestions.addEventListener('change', setupQuestionsListener);
-
     // Logout
     logoutBtn.addEventListener('click', () => {
-      // Set user as offline before logging out
-      if (userPresenceRef) {
-        userPresenceRef.update({
-          status: 'offline',
-          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
+      // Clear polling interval
+      if (pollInterval) clearInterval(pollInterval);
       
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -901,10 +833,6 @@
     commentModal.addEventListener('click', (e) => {
       if (e.target === commentModal) {
         commentModal.classList.add('hidden');
-        if (commentsListener) {
-          commentsListener();
-          commentsListener = null;
-        }
       }
     });
 

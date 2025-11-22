@@ -1,0 +1,58 @@
+.mindmap-container {
+  background: radial-gradient(circle at center, #1e293b, #0f172a);
+}
+.node {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.node:hover {
+  transform: scale(1.05);
+}
+.connection {
+  stroke: #4f46e5;
+  stroke-width: 2;
+}
+.comment-enter {
+  animation: commentSlide 0.3s ease-out;
+}
+@keyframes commentSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pulse-online {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+  .mobile-full {
+    width: 100%;
+  }
+  .mobile-stack {
+    flex-direction: column;
+  }
+  .mobile-padding {
+    padding: 1rem;
+  }
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+  .mobile-gap-2 {
+    gap: 0.5rem;
+  }
+}

@@ -56,3 +56,33 @@
     gap: 0.5rem;
   }
 }
+
+/* Online counter animations */
+.online-pulse {
+  animation: onlinePulse 2s infinite;
+}
+
+@keyframes onlinePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* Idle warning styles */
+.idle-warning {
+  animation: idleWarning 1s infinite alternate;
+}
+
+@keyframes idleWarning {
+  from {
+    background-color: #f59e0b;
+  }
+  to {
+    background-color: #d97706;
+  }
+}

@@ -1,9 +1,10 @@
-let authManager, questionManager, commentManager;
+let authManager, questionManager, commentManager, presenceManager;
 
 document.addEventListener('DOMContentLoaded', function() {
     authManager = new AuthManager();
     questionManager = new QuestionManager(authManager);
     commentManager = new CommentManager(authManager, questionManager);
+    presenceManager = new PresenceManager(authManager);
 
     document.getElementById('logout').addEventListener('click', () => authManager.logout());
 

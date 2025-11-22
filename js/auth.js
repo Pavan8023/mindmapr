@@ -1,6 +1,7 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
+        this.pollInterval = null;
         this.initFirebase();
     }
 
@@ -8,6 +9,7 @@ class AuthManager {
         const firebaseConfig = {
             apiKey: "AIzaSyB24FGLvbQTDNmAH_YO60V_r4ynEhpxIJs",
             authDomain: "mindmapr-638c1.firebaseapp.com",
+            databaseURL: "https://mindmapr-638c1-default-rtdb.firebaseio.com",
             projectId: "mindmapr-638c1",
             storageBucket: "mindmapr-638c1.firebasestorage.app",
             messagingSenderId: "886840058208",
@@ -18,6 +20,7 @@ class AuthManager {
         firebase.initializeApp(firebaseConfig);
         this.auth = firebase.auth();
         this.db = firebase.firestore();
+        this.rtdb = firebase.database();
         
         this.auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
     }
@@ -52,6 +55,7 @@ class AuthManager {
     }
 
     logout() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
         this.auth.signOut().then(() => {
             window.location.href = "index.html";
         });

@@ -61,15 +61,18 @@ class Utils {
         notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
             type === 'success' ? 'bg-emerald-600 text-white' :
             type === 'error' ? 'bg-rose-600 text-white' :
+            type === 'warning' ? 'bg-amber-600 text-white' :
             'bg-slate-700 text-white'
         }`;
         notification.textContent = message;
 
         document.body.appendChild(notification);
 
+        // Longer timeout for warning messages
+        const timeout = type === 'warning' ? 10000 : 3000;
         setTimeout(() => {
             notification.remove();
-        }, 3000);
+        }, timeout);
     }
 
     static async testBackendConnection() {

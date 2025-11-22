@@ -1,12 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <title>MindMapr Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .mindmap-container {
+      background: radial-gradient(circle at center, #1e293b, #0f172a);
+    }
+    .node {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .node:hover {
+      transform: scale(1.05);
+    }
+    .connection {
+      stroke: #4f46e5;
+      stroke-width: 2;
+    }
+    .comment-enter {
+      animation: commentSlide 0.3s ease-out;
+    }
+    @keyframes commentSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .pulse-online {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    /* Form Layout Fixes */
+    .mobile-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .mobile-stack {
+        flex-direction: row;
+      }
+    }
+
+    .mobile-gap-2 {
+      gap: 0.5rem;
+    }
+
+    .mobile-hidden {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .mobile-hidden {
+        display: inline;
+      }
+    }
+
+    .mobile-padding {
+      padding: 1rem;
+    }
+
+    @media (min-width: 1024px) {
+      .mobile-padding {
+        padding: 0;
+      }
+    }
+
+    /* Ensure form elements maintain proper spacing */
+    #question-form .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+
+    #edit-question-form .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+
+    /* Fix button alignment in forms */
+    .flex-1 {
+      flex: 1 1 0%;
+    }
+
+    /* Ensure proper height calculation */
+    .h-\[calc\(100vh-80px\)\] {
+      height: calc(100vh - 80px);
+    }
+
+    /* Make sure textareas don't overflow */
+    textarea {
+      resize: vertical;
+      min-height: 6rem;
+    }
+
+    /* Fix for the submit button section */
+    .flex.items-center.justify-center.gap-2 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* Ensure proper border styling */
+    .border-slate-700 {
+      border-color: rgb(51 65 85);
+    }
+
+    /* Make sure the form container has proper spacing */
+    .max-w-2xl {
+      max-width: 42rem;
+    }
+
+    /* Online counter animations */
+    .online-pulse {
+      animation: onlinePulse 2s infinite;
+    }
+
+    @keyframes onlinePulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+      }
+    }
+
+    /* Idle warning styles */
+    .idle-warning {
+      animation: idleWarning 1s infinite alternate;
+    }
+
+    @keyframes idleWarning {
+      from {
+        background-color: #f59e0b;
+      }
+      to {
+        background-color: #d97706;
+      }
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .mobile-hidden {
+        display: none;
+      }
+      .mobile-full {
+        width: 100%;
+      }
+      .mobile-stack {
+        flex-direction: column;
+      }
+      .mobile-padding {
+        padding: 1rem;
+      }
+      .mobile-text-sm {
+        font-size: 0.875rem;
+      }
+      .mobile-gap-2 {
+        gap: 0.5rem;
+      }
+      
+      /* Mobile layout with 50/50 split */
+      .mobile-split-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 80px);
+        position: relative;
+      }
+      
+      .mobile-split-left {
+        height: 50%;
+        overflow-y: auto;
+        transition: height 0.3s ease;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .mobile-split-right {
+        height: 50%;
+        overflow-y: auto;
+        transition: height 0.3s ease;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .mobile-split-left.full-height {
+        height: 100%;
+      }
+      
+      .mobile-split-right.hidden {
+        height: 0;
+        overflow: hidden;
+      }
+      
+      /* Toggle button - positioned between panels */
+      .mobile-toggle-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #374151;
+        border: 1px solid #4b5563;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: top 0.3s ease;
+      }
+      
+      .mobile-toggle-btn.bottom-position {
+        top: calc(100% - 20px);
+      }
+      
+      .mobile-toggle-btn:hover {
+        background-color: #4b5563;
+      }
+      
+      .lg\:flex-row {
+        flex-direction: column;
+      }
+      
+      .lg\:w-1\/2 {
+        width: 100%;
+      }
+      
+      .lg\:border-r {
+        border-right: none;
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen">
@@ -35,8 +278,9 @@
     </div>
   </nav>
 
-  <div class="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
-    <div class="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-slate-700 p-4 lg:p-6 overflow-y-auto">
+  <div class="mobile-split-container lg:flex lg:flex-row h-[calc(100vh-80px)]">
+    <!-- Left Panel - Questions Feed -->
+    <div class="mobile-split-left w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-slate-700 p-4 lg:p-6 overflow-y-auto">
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 mobile-gap-2">
         <h2 class="text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-0">Live Questions Feed</h2>
         <div class="flex gap-2 mobile-stack sm:flex-row">
@@ -67,7 +311,15 @@
       </div>
     </div>
 
-    <div class="w-full lg:w-1/2 p-4 lg:p-6 bg-slate-800/50">
+    <!-- Mobile toggle button - positioned between panels -->
+    <div class="mobile-toggle-btn lg:hidden" id="mobile-toggle">
+      <svg id="toggle-arrow" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+
+    <!-- Right Panel - Ask a Programming Question Form -->
+    <div class="mobile-split-right w-full lg:w-1/2 p-4 lg:p-6 bg-slate-800/50 overflow-y-auto">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-xl lg:text-2xl font-bold text-white mb-6">Ask a Programming Question</h2>
 
@@ -216,6 +468,34 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 
+  <script>
+    // Mobile toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('mobile-toggle');
+      const toggleArrow = document.getElementById('toggle-arrow');
+      const leftPanel = document.querySelector('.mobile-split-left');
+      const rightPanel = document.querySelector('.mobile-split-right');
+      
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          // Toggle the visibility of the form panel and expand the questions panel
+          rightPanel.classList.toggle('hidden');
+          leftPanel.classList.toggle('full-height');
+          toggleBtn.classList.toggle('bottom-position');
+          
+          // Change arrow direction
+          if (rightPanel.classList.contains('hidden')) {
+            // Form is hidden, questions are full screen - show up arrow
+            toggleArrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />';
+          } else {
+            // Both panels visible - show down arrow
+            toggleArrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />';
+          }
+        });
+      }
+    });
+  </script>
+
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/presence.js"></script>
@@ -223,5 +503,4 @@
   <script src="js/comments.js"></script>
   <script src="js/app.js"></script>
 </body>
-
 </html>

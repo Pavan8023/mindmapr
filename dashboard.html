@@ -276,10 +276,16 @@
     </div>
   </div>
 
+  // Firebase SDKs
+
+
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script>
+
+    // Firebase configuration
+
     const firebaseConfig = {
       apiKey: "AIzaSyB24FGLvbQTDNmAH_YO60V_r4ynEhpxIJs",
       authDomain: "mindmapr-638c1.firebaseapp.com",
@@ -299,7 +305,10 @@
     let pollInterval = null;
     let editingCommentId = null;
 
+    // Backend Render URL
     const API_BASE_URL = 'https://mindmapr.onrender.com/api';
+
+    // DOM Elements
 
     const userAvatar = document.getElementById('user-avatar');
     const userName = document.getElementById('user-name');
@@ -321,7 +330,7 @@
     const onlineCount = document.getElementById('online-count');
 
 
-
+    // Authenticate The User
 
     auth.onAuthStateChanged((user) => {
       if (!user) {
@@ -340,7 +349,7 @@
       }
     });
 
-
+    // Test The Backend Connection right or wrong
 
 
     async function testBackendConnection() {
@@ -353,7 +362,7 @@
       }
     }
 
-
+    // Displays user profile data
 
 
     async function loadUserData(user) {

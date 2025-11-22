@@ -6,6 +6,7 @@ class PresenceManager {
         this.idleTimeout = 15 * 60 * 1000; // 15 minutes
         this.idleTimer = null;
         this.warningTimer = null;
+        this.userStatusRef = null;
         
         this.setupPresenceSystem();
     }
@@ -18,6 +19,7 @@ class PresenceManager {
                 this.setupActivityListeners();
                 this.setupOnlineUsersListener();
             } else {
+                // User logged out - clean up presence
                 this.setUserOffline();
                 this.cleanup();
             }
@@ -27,20 +29,26 @@ class PresenceManager {
     setUserOnline() {
         if (!this.userId) return;
         
-        const userStatusRef = this.authManager.rtdb.ref('status/' + this.userId);
+        this.userStatusRef = this.authManager.rtdb.ref('status/' + this.userId);
         
-        // Set user online
-        userStatusRef.set({
+        // Set user online with current timestamp
+        this.userStatusRef.set({
             online: true,
             lastActive: Date.now(),
-            userId: this.userId
+            userId: this.userId,
+            lastUpdated: Date.now()
+        }).then(() => {
+            console.log('User set online:', this.userId);
+        }).catch((error) => {
+            console.error('Error setting user online:', error);
         });
 
-        // Remove user when they disconnect
-        userStatusRef.onDisconnect().set({
+        // Setup onDisconnect to mark user as offline when they close the tab/browser
+        this.userStatusRef.onDisconnect().set({
             online: false,
             lastActive: Date.now(),
-            userId: this.userId
+            userId: this.userId,
+            lastUpdated: Date.now()
         });
 
         this.isOnline = true;
@@ -50,11 +58,24 @@ class PresenceManager {
     setUserOffline() {
         if (!this.userId) return;
         
-        const userStatusRef = this.authManager.rtdb.ref('status/' + this.userId);
-        userStatusRef.set({
+        console.log('Setting user offline:', this.userId);
+        
+        // Cancel the onDisconnect handler first
+        if (this.userStatusRef) {
+            this.userStatusRef.onDisconnect().cancel();
+        }
+        
+        // Then set user offline
+        const offlineRef = this.authManager.rtdb.ref('status/' + this.userId);
+        offlineRef.set({
             online: false,
             lastActive: Date.now(),
-            userId: this.userId
+            userId: this.userId,
+            lastUpdated: Date.now()
+        }).then(() => {
+            console.log('User successfully set offline:', this.userId);
+        }).catch((error) => {
+            console.error('Error setting user offline:', error);
         });
 
         this.isOnline = false;
@@ -69,14 +90,16 @@ class PresenceManager {
             let onlineCount = 0;
 
             if (users) {
+                const currentTime = Date.now();
                 Object.values(users).forEach(user => {
-                    // Consider user online if they were active in the last 2 minutes
-                    if (user.online === true && Date.now() - user.lastActive < 120000) {
+                    // Consider user online if they were active in the last 2 minutes AND marked as online
+                    if (user.online === true && currentTime - user.lastActive < 120000) {
                         onlineCount++;
                     }
                 });
             }
 
+            console.log('Online users count:', onlineCount);
             this.updateOnlineCounter(onlineCount);
         });
     }
@@ -113,6 +136,11 @@ class PresenceManager {
                 this.handleUserActivity();
             }
         });
+
+        // Also update activity periodically (every 30 seconds) to handle background tabs
+        this.activityInterval = setInterval(() => {
+            this.updateLastActive();
+        }, 30000);
     }
 
     handleUserActivity() {
@@ -121,10 +149,12 @@ class PresenceManager {
     }
 
     updateLastActive() {
-        if (this.userId && this.isOnline) {
-            const userStatusRef = this.authManager.rtdb.ref('status/' + this.userId);
-            userStatusRef.update({
-                lastActive: Date.now()
+        if (this.userId && this.isOnline && this.userStatusRef) {
+            this.userStatusRef.update({
+                lastActive: Date.now(),
+                lastUpdated: Date.now()
+            }).catch((error) => {
+                console.error('Error updating last active:', error);
             });
         }
     }
@@ -152,6 +182,7 @@ class PresenceManager {
     handleIdleTimeout() {
         console.log('User idle for 15 minutes, logging out...');
         Utils.showNotification('You have been logged out due to inactivity', 'info');
+        this.setUserOffline(); // Ensure user is marked offline
         this.authManager.logout();
     }
 
@@ -168,7 +199,21 @@ class PresenceManager {
 
     cleanup() {
         this.clearTimers();
+        
+        // Clear activity interval
+        if (this.activityInterval) {
+            clearInterval(this.activityInterval);
+            this.activityInterval = null;
+        }
+        
         this.userId = null;
         this.isOnline = false;
+        this.userStatusRef = null;
+    }
+
+    // Method to manually trigger cleanup (called from auth manager during logout)
+    forceCleanup() {
+        this.setUserOffline();
+        this.cleanup();
     }
 }

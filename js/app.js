@@ -5,8 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
     questionManager = new QuestionManager(authManager);
     commentManager = new CommentManager(authManager, questionManager);
     presenceManager = new PresenceManager(authManager);
+    
+    // Set the presence manager reference in auth manager
+    authManager.setPresenceManager(presenceManager);
 
-    document.getElementById('logout').addEventListener('click', () => authManager.logout());
+    document.getElementById('logout').addEventListener('click', () => {
+        console.log('Logout button clicked');
+        authManager.logout();
+    });
 
     document.querySelectorAll('textarea').forEach(textarea => {
         textarea.addEventListener('keydown', (e) => {

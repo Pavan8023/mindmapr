@@ -44,25 +44,43 @@
         opacity: 0.7;
       }
     }
+    @media (max-width: 768px) {
+      .mobile-hidden {
+        display: none;
+      }
+      .mobile-full {
+        width: 100%;
+      }
+      .mobile-stack {
+        flex-direction: column;
+      }
+      .mobile-padding {
+        padding: 1rem;
+      }
+      .mobile-text-sm {
+        font-size: 0.875rem;
+      }
+      .mobile-gap-2 {
+        gap: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
-  <!-- Navigation -->
   <nav class="bg-slate-800 border-b border-slate-700 p-4">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center gap-3">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mobile-gap-2">
+      <div class="flex items-center gap-3 mb-2 sm:mb-0">
         <h1 class="text-xl font-bold text-emerald-400">MindMapr</h1>
-        <span class="text-sm text-slate-400">Programming & College Q/A Platform</span>
+        <span class="text-sm text-slate-400 mobile-hidden">Programming & College Q/A Platform</span>
       </div>
-      <div class="flex items-center gap-4">
-        <!-- Live Users Counter -->
+      <div class="flex items-center justify-between sm:justify-end gap-4">
         <div id="live-users" class="flex items-center gap-2 bg-green-600/20 text-green-400 px-3 py-1 rounded-lg text-sm border border-green-500/30">
           <span class="w-2 h-2 bg-green-400 rounded-full pulse-online"></span>
           <span id="online-count">1</span>
-          <span>online</span>
+          <span class="mobile-hidden">online</span>
         </div>
         
-        <div class="flex items-center gap-3 bg-slate-700/50 px-3 py-1 rounded-lg">
+        <div class="flex items-center gap-3 bg-slate-700/50 px-3 py-1 rounded-lg mobile-hidden">
           <img id="user-avatar" class="w-6 h-6 rounded-full border border-emerald-400" src="" alt="Profile">
           <span id="user-name" class="text-sm font-medium"></span>
         </div>
@@ -73,14 +91,12 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <div class="flex h-[calc(100vh-80px)]">
-    <!-- Left Side - Live Questions Feed (50%) -->
-    <div class="w-1/2 border-r border-slate-700 p-6 overflow-y-auto">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-white">Live Questions Feed</h2>
-        <div class="flex gap-2">
-          <select id="category-filter" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+  <div class="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
+    <div class="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-slate-700 p-4 lg:p-6 overflow-y-auto">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 mobile-gap-2">
+        <h2 class="text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-0">Live Questions Feed</h2>
+        <div class="flex gap-2 mobile-stack sm:flex-row">
+          <select id="category-filter" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
             <option value="all">All Categories</option>
             <option value="web-development">Web Development</option>
             <option value="data-structures">Data Structures</option>
@@ -89,7 +105,7 @@
             <option value="college">College Related</option>
             <option value="other">Other</option>
           </select>
-          <select id="sort-questions" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+          <select id="sort-questions" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="category">By Category</option>
@@ -97,12 +113,9 @@
         </div>
       </div>
 
-      <!-- Live Questions Grid -->
       <div id="questions-container" class="grid gap-4">
-        <!-- Questions will be dynamically loaded here -->
       </div>
 
-      <!-- Loading State -->
       <div id="loading-questions" class="text-center py-8">
         <div class="inline-flex items-center gap-2 text-slate-400">
           <div class="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
@@ -111,12 +124,10 @@
       </div>
     </div>
 
-    <!-- Right Side - Question Form (50%) -->
-    <div class="w-1/2 p-6 bg-slate-800/50">
+    <div class="w-full lg:w-1/2 p-4 lg:p-6 bg-slate-800/50">
       <div class="max-w-2xl mx-auto">
-        <h2 class="text-2xl font-bold text-white mb-6">Ask a Programming Question</h2>
+        <h2 class="text-xl lg:text-2xl font-bold text-white mb-6">Ask a Programming Question</h2>
         
-        <!-- Question Form -->
         <form id="question-form" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-slate-200 mb-2">Question Title</label>
@@ -156,7 +167,7 @@
                       placeholder="// Add your code here..."></textarea>
           </div>
 
-          <div class="flex gap-3 pt-4">
+          <div class="flex gap-3 pt-4 mobile-stack sm:flex-row">
             <button type="submit" id="submit-question" 
                     class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
               <span>Submit Question</span>
@@ -171,7 +182,6 @@
           </div>
         </form>
 
-        <!-- Edit Form (Hidden by default) -->
         <form id="edit-question-form" class="space-y-4 hidden mt-8">
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-semibold text-emerald-400">Edit Question</h3>
@@ -208,7 +218,7 @@
             <textarea id="edit-question-code" 
                       class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent h-24 font-mono text-sm"></textarea>
           </div>
-          <div class="flex gap-3">
+          <div class="flex gap-3 mobile-stack sm:flex-row">
             <button type="submit" 
                     class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-lg transition">
               Update Question
@@ -223,10 +233,9 @@
     </div>
   </div>
 
-  <!-- Comment Modal -->
-  <div id="comment-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div id="comment-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden mobile-padding">
     <div class="bg-slate-800 rounded-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
-      <div class="p-6 border-b border-slate-700">
+      <div class="p-4 lg:p-6 border-b border-slate-700">
         <div class="flex justify-between items-center">
           <h3 class="text-lg font-semibold text-white">Question Discussion</h3>
           <button id="close-comment-modal" class="text-slate-400 hover:text-white">
@@ -236,13 +245,11 @@
           </button>
         </div>
         <div id="comment-question-content" class="mt-4">
-          <!-- Question content will be loaded here -->
         </div>
       </div>
       
-      <div class="flex-1 overflow-y-auto p-6">
+      <div class="flex-1 overflow-y-auto p-4 lg:p-6">
         <div id="comments-container" class="space-y-4">
-          <!-- Comments will be loaded here -->
         </div>
         <div id="no-comments" class="text-center py-8 text-slate-400 hidden">
           <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,8 +259,8 @@
         </div>
       </div>
       
-      <div class="p-6 border-t border-slate-700">
-        <form id="comment-form" class="flex gap-3">
+      <div class="p-4 lg:p-6 border-t border-slate-700">
+        <form id="comment-form" class="flex gap-3 mobile-stack sm:flex-row">
           <input type="hidden" id="comment-question-id">
           <div class="flex-1">
             <input type="text" id="comment-text" 
@@ -274,853 +281,828 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyB24FGLvbQTDNmAH_YO60V_r4ynEhpxIJs",
-  authDomain: "mindmapr-638c1.firebaseapp.com",
-  projectId: "mindmapr-638c1",
-  storageBucket: "mindmapr-638c1.firebasestorage.app",
-  messagingSenderId: "886840058208",
-  appId: "1:886840058208:web:330a3433d1ab036c663e05",
-  measurementId: "G-F9R3TQ3262"
-};
+      apiKey: "AIzaSyB24FGLvbQTDNmAH_YO60V_r4ynEhpxIJs",
+      authDomain: "mindmapr-638c1.firebaseapp.com",
+      projectId: "mindmapr-638c1",
+      storageBucket: "mindmapr-638c1.firebasestorage.app",
+      messagingSenderId: "886840058208",
+      appId: "1:886840058208:web:330a3433d1ab036c663e05",
+      measurementId: "G-F9R3TQ3262"
+    };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-let currentUser = null;
-let currentQuestionId = null;
-let pollInterval = null;
-let editingCommentId = null;
+    let currentUser = null;
+    let currentQuestionId = null;
+    let pollInterval = null;
+    let editingCommentId = null;
 
-// API Base URL
-const API_BASE_URL = 'https://mindmapr.onrender.com/api';
+    const API_BASE_URL = 'https://mindmapr.onrender.com/api';
 
-// DOM Elements
-const userAvatar = document.getElementById('user-avatar');
-const userName = document.getElementById('user-name');
-const logoutBtn = document.getElementById('logout');
-const questionsContainer = document.getElementById('questions-container');
-const loadingQuestions = document.getElementById('loading-questions');
-const questionForm = document.getElementById('question-form');
-const editQuestionForm = document.getElementById('edit-question-form');
-const categoryFilter = document.getElementById('category-filter');
-const sortQuestions = document.getElementById('sort-questions');
-const commentModal = document.getElementById('comment-modal');
-const closeCommentModal = document.getElementById('close-comment-modal');
-const commentQuestionContent = document.getElementById('comment-question-content');
-const commentsContainer = document.getElementById('comments-container');
-const noComments = document.getElementById('no-comments');
-const commentForm = document.getElementById('comment-form');
-const commentQuestionId = document.getElementById('comment-question-id');
-const commentText = document.getElementById('comment-text');
-const onlineCount = document.getElementById('online-count');
+    const userAvatar = document.getElementById('user-avatar');
+    const userName = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout');
+    const questionsContainer = document.getElementById('questions-container');
+    const loadingQuestions = document.getElementById('loading-questions');
+    const questionForm = document.getElementById('question-form');
+    const editQuestionForm = document.getElementById('edit-question-form');
+    const categoryFilter = document.getElementById('category-filter');
+    const sortQuestions = document.getElementById('sort-questions');
+    const commentModal = document.getElementById('comment-modal');
+    const closeCommentModal = document.getElementById('close-comment-modal');
+    const commentQuestionContent = document.getElementById('comment-question-content');
+    const commentsContainer = document.getElementById('comments-container');
+    const noComments = document.getElementById('no-comments');
+    const commentForm = document.getElementById('comment-form');
+    const commentQuestionId = document.getElementById('comment-question-id');
+    const commentText = document.getElementById('comment-text');
+    const onlineCount = document.getElementById('online-count');
 
-// Check authentication and load user data
-auth.onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    currentUser = user;
-    loadUserData(user);
-    
-    // Test backend connection first
-    testBackendConnection().then(success => {
-      if (success) {
-        setupQuestionsListener();
+
+
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
       } else {
-        showNotification('Backend server is not running. Please start the backend server.', 'error');
+        currentUser = user;
+        loadUserData(user);
+        
+        testBackendConnection().then(success => {
+          if (success) {
+            setupQuestionsListener();
+          } else {
+            showNotification('Backend server is not running. Please start the backend server.', 'error');
+          }
+        });
       }
     });
-  }
-});
 
-// Test backend connection
-async function testBackendConnection() {
-  try {
-    console.log('🔌 Testing backend connection...');
-    const response = await fetch(`${API_BASE_URL}/test`);
-    const data = await response.json();
-    console.log('✅ Backend connection test:', data);
-    return true;
-  } catch (error) {
-    console.error('❌ Backend connection failed:', error);
-    return false;
-  }
-}
 
-// Load user data from Firestore
-async function loadUserData(user) {
-  try {
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (userDoc.exists) {
-      const userData = userDoc.data();
-      userName.textContent = userData.displayName || user.email;
-      userAvatar.src = userData.photoURL || 'https://via.placeholder.com/32?text=U';
-    } else {
-      userName.textContent = user.displayName || user.email;
-      userAvatar.src = user.photoURL || 'https://via.placeholder.com/32?text=U';
+
+
+    async function testBackendConnection() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/test`);
+        const data = await response.json();
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
-  } catch (error) {
-    console.error('Error loading user data:', error);
-    userName.textContent = user.email;
-    userAvatar.src = 'https://via.placeholder.com/32?text=U';
-  }
-}
 
-// Setup polling for questions
-function setupQuestionsListener() {
-  // Initial load
-  fetchQuestions();
-  
-  // Set up polling every 3 seconds for real-time updates
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(fetchQuestions, 3000);
-  
-  // Add event listeners for filters
-  categoryFilter.addEventListener('change', fetchQuestions);
-  sortQuestions.addEventListener('change', fetchQuestions);
-}
 
-// Fetch questions from backend
-async function fetchQuestions() {
-  try {
-    const category = categoryFilter.value;
-    const sort = sortQuestions.value;
-    
-    console.log('🔄 Fetching questions...');
-    const response = await fetch(
-      `${API_BASE_URL}/questions?category=${category}&sort=${sort}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+
+
+    async function loadUserData(user) {
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userName.textContent = userData.displayName || user.email;
+          userAvatar.src = userData.photoURL || 'https://via.placeholder.com/32?text=U';
+        } else {
+          userName.textContent = user.displayName || user.email;
+          userAvatar.src = user.photoURL || 'https://via.placeholder.com/32?text=U';
+        }
+      } catch (error) {
+        userName.textContent = user.email;
+        userAvatar.src = 'https://via.placeholder.com/32?text=U';
+      }
     }
-    
-    const questions = await response.json();
-    
-    console.log(`✅ Loaded ${questions.length} questions`);
-    loadingQuestions.classList.add('hidden');
-    questionsContainer.innerHTML = '';
-    
-    if (questions.length === 0) {
-      questionsContainer.innerHTML = `
-        <div class="text-center py-12 text-slate-400">
-          <svg class="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-          </svg>
-          <p class="text-lg mb-2">No questions yet</p>
-          <p class="text-sm">Be the first to ask a question!</p>
-        </div>
-      `;
-      return;
-    }
-    
-    // Sort questions by creation date (newest first) as backup
-    questions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
-    questions.forEach((question) => {
-      displayQuestion(question._id, question);
-    });
-  } catch (error) {
-    console.error('❌ Error loading questions:', error);
-    loadingQuestions.innerHTML = `
-      <div class="text-center py-8 text-rose-400">
-        <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-        </svg>
-        <p>Error loading questions</p>
-        <p class="text-sm text-slate-400 mt-1">Please check your connection</p>
-        <button onclick="fetchQuestions()" class="mt-3 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm transition">
-          Retry
-        </button>
-      </div>
-    `;
-  }
-}
 
-// Display a question in the container
-function displayQuestion(id, question) {
-  const questionElement = document.createElement('div');
-  questionElement.className = 'bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition';
-  questionElement.setAttribute('data-question-id', id);
-  
-  const questionDate = question.createdAt ? new Date(question.createdAt) : new Date();
-  
-  questionElement.innerHTML = `
-    <div class="flex justify-between items-start mb-3">
-      <div class="flex items-center gap-2">
-        <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
-          ${getCategoryLabel(question.category)}
-        </span>
-        <div class="flex items-center gap-2 text-xs text-slate-400">
-          <img src="${question.userPhotoURL || 'https://via.placeholder.com/20?text=U'}" 
-               class="w-4 h-4 rounded-full" alt="User">
-          <span>${question.userName || question.userEmail}</span>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="openComments('${id}')" class="text-slate-400 hover:text-indigo-400 transition flex items-center gap-1 text-xs">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-          </svg>
-          Comment
-        </button>
-        ${question.userId === currentUser.uid ? `
-          <button onclick="editQuestion('${id}')" class="text-slate-400 hover:text-emerald-400 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+
+
+
+    function setupQuestionsListener() {
+      fetchQuestions();
+      
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(fetchQuestions, 3000);
+      
+      categoryFilter.addEventListener('change', fetchQuestions);
+      sortQuestions.addEventListener('change', fetchQuestions);
+    }
+
+
+
+
+    async function fetchQuestions() {
+      try {
+        const category = categoryFilter.value;
+        const sort = sortQuestions.value;
+        
+        const response = await fetch(
+          `${API_BASE_URL}/questions?category=${category}&sort=${sort}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const questions = await response.json();
+        
+        loadingQuestions.classList.add('hidden');
+        questionsContainer.innerHTML = '';
+        
+        if (questions.length === 0) {
+          questionsContainer.innerHTML = `
+            <div class="text-center py-12 text-slate-400">
+              <svg class="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              <p class="text-lg mb-2">No questions yet</p>
+              <p class="text-sm">Be the first to ask a question!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        questions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        questions.forEach((question) => {
+          displayQuestion(question._id, question);
+        });
+      } catch (error) {
+        loadingQuestions.innerHTML = `
+          <div class="text-center py-8 text-rose-400">
+            <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
-          </button>
-          <button onclick="deleteQuestion('${id}')" class="text-slate-400 hover:text-rose-400 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-            </svg>
-          </button>
-        ` : ''}
-      </div>
-    </div>
-    <h3 class="font-semibold text-white mb-2">${question.title}</h3>
-    <p class="text-slate-300 text-sm mb-3">${question.description}</p>
-    ${question.code ? `
-      <div class="bg-slate-900 rounded p-3 mb-3">
-        <pre class="text-sm text-emerald-400 font-mono overflow-x-auto"><code>${escapeHtml(question.code)}</code></pre>
-      </div>
-    ` : ''}
-    <div class="text-xs text-slate-400 flex justify-between items-center">
-      <span>${formatDate(questionDate)}</span>
-      <span class="flex items-center gap-1">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        ${questionDate.toLocaleTimeString()}
-      </span>
-    </div>
-  `;
-  questionsContainer.appendChild(questionElement);
-}
-
-// Open comments modal
-window.openComments = async function(questionId) {
-  try {
-    console.log('💬 Opening comments for question:', questionId);
-    currentQuestionId = questionId;
-    commentQuestionId.value = questionId;
-    editingCommentId = null; // Reset editing state
-    
-    // Load question details
-    const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to load question');
-    }
-    
-    const question = await response.json();
-    console.log('✅ Loaded question for comments:', question);
-    
-    commentQuestionContent.innerHTML = `
-      <div class="bg-slate-700/50 rounded-lg p-4">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
-            ${getCategoryLabel(question.category)}
-          </span>
-          <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
-        </div>
-        <h4 class="font-semibold text-white mb-2">${question.title}</h4>
-        <p class="text-slate-300 text-sm">${question.description}</p>
-        ${question.code ? `
-          <div class="bg-slate-800 rounded p-3 mt-3">
-            <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${escapeHtml(question.code)}</code></pre>
+            <p>Error loading questions</p>
+            <p class="text-sm text-slate-400 mt-1">Please check your connection</p>
+            <button onclick="fetchQuestions()" class="mt-3 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm transition">
+              Retry
+            </button>
           </div>
-        ` : ''}
-      </div>
-    `;
-
-    // Load comments
-    await loadComments(questionId);
-    
-    // Show modal
-    commentModal.classList.remove('hidden');
-    commentText.focus();
-  } catch (error) {
-    console.error('❌ Error opening comments:', error);
-    showNotification('Error loading comments: ' + error.message, 'error');
-  }
-};
-
-// Load comments for a question
-async function loadComments(questionId) {
-  try {
-    console.log('🔄 Loading comments for question:', questionId);
-    const response = await fetch(`${API_BASE_URL}/comments/${questionId}`);
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to load comments');
+        `;
+      }
     }
-    
-    const comments = await response.json();
-    console.log(`✅ Loaded ${comments.length} comments`);
-    
-    commentsContainer.innerHTML = '';
-    
-    if (comments.length === 0) {
-      noComments.classList.remove('hidden');
-      return;
-    }
-    
-    noComments.classList.add('hidden');
-    
-    // Sort comments by date
-    comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    
-    comments.forEach((comment) => {
-      displayComment(comment._id, comment);
-    });
-    
-    // Scroll to bottom
-    commentsContainer.scrollTop = commentsContainer.scrollHeight;
-  } catch (error) {
-    console.error('❌ Error loading comments:', error);
-    noComments.classList.remove('hidden');
-    showNotification('Error loading comments: ' + error.message, 'error');
-  }
-}
 
-// Display a comment
-function displayComment(id, comment) {
-  const commentDate = comment.createdAt ? new Date(comment.createdAt) : new Date();
-  const commentElement = document.createElement('div');
-  commentElement.className = 'comment-enter bg-slate-700/30 rounded-lg p-4 border border-slate-600';
-  commentElement.setAttribute('data-comment-id', id);
-  
-  const isCurrentUserComment = comment.userId === currentUser.uid;
-  
-  commentElement.innerHTML = `
-    <div class="flex items-start gap-3">
-      <img src="${comment.userPhotoURL || 'https://via.placeholder.com/32?text=U'}" 
-           class="w-8 h-8 rounded-full border border-slate-500" alt="User">
-      <div class="flex-1">
-        <div class="flex items-center justify-between mb-1">
+
+
+
+    function displayQuestion(id, question) {
+      const questionElement = document.createElement('div');
+      questionElement.className = 'bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition';
+      questionElement.setAttribute('data-question-id', id);
+      
+      const questionDate = question.createdAt ? new Date(question.createdAt) : new Date();
+      
+      questionElement.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
           <div class="flex items-center gap-2">
-            <span class="font-medium text-sm text-white">${comment.userName || comment.userEmail}</span>
-            <span class="text-xs text-slate-400">${formatTime(commentDate)}</span>
+            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
+              ${getCategoryLabel(question.category)}
+            </span>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <img src="${question.userPhotoURL || 'https://via.placeholder.com/20?text=U'}" 
+                   class="w-4 h-4 rounded-full" alt="User">
+              <span class="mobile-text-sm">${question.userName || question.userEmail}</span>
+            </div>
           </div>
-          ${isCurrentUserComment ? `
-            <div class="flex gap-2">
-              <button onclick="editComment('${id}')" class="text-slate-400 hover:text-emerald-400 transition text-xs">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex gap-2">
+            <button onclick="openComments('${id}')" class="text-slate-400 hover:text-indigo-400 transition flex items-center gap-1 text-xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              <span class="mobile-hidden">Comment</span>
+            </button>
+            ${question.userId === currentUser.uid ? `
+              <button onclick="editQuestion('${id}')" class="text-slate-400 hover:text-emerald-400 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
               </button>
-              <button onclick="deleteComment('${id}')" class="text-slate-400 hover:text-rose-400 transition text-xs">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button onclick="deleteQuestion('${id}')" class="text-slate-400 hover:text-rose-400 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
               </button>
-            </div>
-          ` : ''}
+            ` : ''}
+          </div>
         </div>
-        <p class="text-slate-200 text-sm">${comment.text}</p>
-      </div>
-    </div>
-  `;
-  commentsContainer.appendChild(commentElement);
-}
+        <h3 class="font-semibold text-white mb-2 mobile-text-sm">${question.title}</h3>
+        <p class="text-slate-300 text-sm mb-3 mobile-text-sm">${question.description}</p>
+        ${question.code ? `
+          <div class="bg-slate-900 rounded p-3 mb-3">
+            <pre class="text-sm text-emerald-400 font-mono overflow-x-auto"><code>${escapeHtml(question.code)}</code></pre>
+          </div>
+        ` : ''}
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>${formatDate(questionDate)}</span>
+          <span class="flex items-center gap-1 mobile-hidden">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            ${questionDate.toLocaleTimeString()}
+          </span>
+        </div>
+      `;
+      questionsContainer.appendChild(questionElement);
+    }
 
-// Edit comment
-window.editComment = async function(commentId) {
-  try {
-    console.log('✏️ Editing comment:', commentId);
-    
-    // Find the comment element
-    const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
-    if (!commentElement) return;
-    
-    // Get current comment text
-    const currentText = commentElement.querySelector('p').textContent;
-    
-    // Replace with edit form
-    commentElement.innerHTML = `
-      <div class="flex items-start gap-3">
-        <img src="${currentUser.photoURL || 'https://via.placeholder.com/32?text=U'}" 
-             class="w-8 h-8 rounded-full border border-slate-500" alt="User">
-        <div class="flex-1">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <span class="font-medium text-sm text-white">${currentUser.displayName || currentUser.email}</span>
-              <span class="text-xs text-slate-400">Editing...</span>
+
+
+
+    window.openComments = async function(questionId) {
+      try {
+        currentQuestionId = questionId;
+        commentQuestionId.value = questionId;
+        editingCommentId = null;
+        
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to load question');
+        }
+        
+        const question = await response.json();
+        
+        commentQuestionContent.innerHTML = `
+          <div class="bg-slate-700/50 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(question.category)}">
+                ${getCategoryLabel(question.category)}
+              </span>
+              <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
             </div>
-            <div class="flex gap-2">
-              <button onclick="saveCommentEdit('${commentId}')" class="text-emerald-400 hover:text-emerald-300 transition text-xs">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-              </button>
-              <button onclick="cancelCommentEdit('${commentId}')" class="text-slate-400 hover:text-white transition text-xs">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
+            <h4 class="font-semibold text-white mb-2 mobile-text-sm">${question.title}</h4>
+            <p class="text-slate-300 text-sm mobile-text-sm">${question.description}</p>
+            ${question.code ? `
+              <div class="bg-slate-800 rounded p-3 mt-3">
+                <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${escapeHtml(question.code)}</code></pre>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        await loadComments(questionId);
+        
+        commentModal.classList.remove('hidden');
+        commentText.focus();
+      } catch (error) {
+        showNotification('Error loading comments: ' + error.message, 'error');
+      }
+    };
+
+
+
+
+    async function loadComments(questionId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/comments/${questionId}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to load comments');
+        }
+        
+        const comments = await response.json();
+        
+        commentsContainer.innerHTML = '';
+        
+        if (comments.length === 0) {
+          noComments.classList.remove('hidden');
+          return;
+        }
+        
+        noComments.classList.add('hidden');
+        
+        comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        
+        comments.forEach((comment) => {
+          displayComment(comment._id, comment);
+        });
+        
+        commentsContainer.scrollTop = commentsContainer.scrollHeight;
+      } catch (error) {
+        noComments.classList.remove('hidden');
+        showNotification('Error loading comments: ' + error.message, 'error');
+      }
+    }
+
+
+
+
+    function displayComment(id, comment) {
+      const commentDate = comment.createdAt ? new Date(comment.createdAt) : new Date();
+      const commentElement = document.createElement('div');
+      commentElement.className = 'comment-enter bg-slate-700/30 rounded-lg p-4 border border-slate-600';
+      commentElement.setAttribute('data-comment-id', id);
+      
+      const isCurrentUserComment = comment.userId === currentUser.uid;
+      
+      commentElement.innerHTML = `
+        <div class="flex items-start gap-3">
+          <img src="${comment.userPhotoURL || 'https://via.placeholder.com/32?text=U'}" 
+               class="w-8 h-8 rounded-full border border-slate-500" alt="User">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-sm text-white mobile-text-sm">${comment.userName || comment.userEmail}</span>
+                <span class="text-xs text-slate-400 mobile-hidden">${formatTime(commentDate)}</span>
+              </div>
+              ${isCurrentUserComment ? `
+                <div class="flex gap-2">
+                  <button onclick="editComment('${id}')" class="text-slate-400 hover:text-emerald-400 transition text-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </button>
+                  <button onclick="deleteComment('${id}')" class="text-slate-400 hover:text-rose-400 transition text-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+            <p class="text-slate-200 text-sm mobile-text-sm">${comment.text}</p>
+          </div>
+        </div>
+      `;
+      commentsContainer.appendChild(commentElement);
+    }
+
+
+
+
+    window.editComment = async function(commentId) {
+      try {
+        const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+        if (!commentElement) return;
+        
+        const currentText = commentElement.querySelector('p').textContent;
+        
+        commentElement.innerHTML = `
+          <div class="flex items-start gap-3">
+            <img src="${currentUser.photoURL || 'https://via.placeholder.com/32?text=U'}" 
+                 class="w-8 h-8 rounded-full border border-slate-500" alt="User">
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-sm text-white mobile-text-sm">${currentUser.displayName || currentUser.email}</span>
+                  <span class="text-xs text-slate-400 mobile-hidden">Editing...</span>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="saveCommentEdit('${commentId}')" class="text-emerald-400 hover:text-emerald-300 transition text-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </button>
+                  <button onclick="cancelCommentEdit('${commentId}')" class="text-slate-400 hover:text-white transition text-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <textarea id="edit-comment-text-${commentId}" 
+                        class="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        rows="3">${currentText}</textarea>
             </div>
           </div>
-          <textarea id="edit-comment-text-${commentId}" 
-                    class="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    rows="3">${currentText}</textarea>
-        </div>
-      </div>
-    `;
-    
-    editingCommentId = commentId;
-    
-    // Focus on the textarea
-    const textarea = document.getElementById(`edit-comment-text-${commentId}`);
-    textarea.focus();
-    
-  } catch (error) {
-    console.error('❌ Error starting comment edit:', error);
-    showNotification('Error starting comment edit', 'error');
-  }
-};
-
-// Save comment edit
-window.saveCommentEdit = async function(commentId) {
-  try {
-    const textarea = document.getElementById(`edit-comment-text-${commentId}`);
-    const newText = textarea.value.trim();
-    
-    if (!newText) {
-      showNotification('Comment cannot be empty', 'error');
-      return;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: newText,
-        userId: currentUser.uid
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update comment');
-    }
-    
-    const updatedComment = await response.json();
-    
-    // Reload comments to show the updated comment
-    await loadComments(currentQuestionId);
-    
-    editingCommentId = null;
-    showNotification('Comment updated successfully!', 'success');
-    
-  } catch (error) {
-    console.error('❌ Error updating comment:', error);
-    showNotification('Error updating comment: ' + error.message, 'error');
-  }
-};
-
-// Cancel comment edit
-window.cancelCommentEdit = function(commentId) {
-  editingCommentId = null;
-  loadComments(currentQuestionId);
-};
-
-// Delete comment
-window.deleteComment = async function(commentId) {
-  if (confirm('Are you sure you want to delete this comment?')) {
-    try {
-      console.log('🗑️ Deleting comment:', commentId);
-      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: currentUser.uid }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete comment');
+        `;
+        
+        editingCommentId = commentId;
+        
+        const textarea = document.getElementById(`edit-comment-text-${commentId}`);
+        textarea.focus();
+        
+      } catch (error) {
+        showNotification('Error starting comment edit', 'error');
       }
-      
-      // Remove the comment element immediately
-      const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
-      if (commentElement) {
-        commentElement.remove();
-      }
-      
-      // Check if no comments left
-      if (commentsContainer.children.length === 0) {
-        noComments.classList.remove('hidden');
-      }
-      
-      showNotification('Comment deleted successfully!', 'success');
-      
-    } catch (error) {
-      console.error('❌ Error deleting comment:', error);
-      showNotification('Error deleting comment: ' + error.message, 'error');
-    }
-  }
-};
-
-// Submit new comment
-commentForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const text = commentText.value.trim();
-  if (!text) return;
-  
-  const submitBtn = commentForm.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  
-  submitBtn.innerHTML = 'Sending...';
-  submitBtn.disabled = true;
-
-  try {
-    const commentData = {
-      text: text,
-      userId: currentUser.uid,
-      userName: currentUser.displayName || currentUser.email,
-      userEmail: currentUser.email,
-      userPhotoURL: currentUser.photoURL || '',
-      questionId: currentQuestionId
     };
 
-    console.log('📤 Submitting comment:', commentData);
-    const response = await fetch(`${API_BASE_URL}/comments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(commentData),
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to submit comment');
-    }
-    
-    // Clear comment input and refresh comments
-    commentText.value = '';
-    await loadComments(currentQuestionId);
-    
-    showNotification('Comment added successfully!', 'success');
-    
-  } catch (error) {
-    console.error('❌ Error submitting comment:', error);
-    showNotification('Error submitting comment: ' + error.message, 'error');
-  } finally {
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-});
 
-// Close comment modal
-closeCommentModal.addEventListener('click', () => {
-  commentModal.classList.add('hidden');
-  editingCommentId = null;
-});
 
-// Submit new question
-questionForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const submitBtn = document.getElementById('submit-question');
-  const originalText = submitBtn.innerHTML;
-  
-  submitBtn.innerHTML = `
-    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-    Submitting...
-  `;
-  submitBtn.disabled = true;
+    window.saveCommentEdit = async function(commentId) {
+      try {
+        const textarea = document.getElementById(`edit-comment-text-${commentId}`);
+        const newText = textarea.value.trim();
+        
+        if (!newText) {
+          showNotification('Comment cannot be empty', 'error');
+          return;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: newText,
+            userId: currentUser.uid
+          }),
+        });
 
-  try {
-    const questionData = {
-      title: document.getElementById('question-title').value,
-      category: document.getElementById('question-category').value,
-      description: document.getElementById('question-description').value,
-      code: document.getElementById('question-code').value,
-      userId: currentUser.uid,
-      userName: currentUser.displayName || currentUser.email,
-      userEmail: currentUser.email,
-      userPhotoURL: currentUser.photoURL || ''
-    };
-
-    const response = await fetch(`${API_BASE_URL}/questions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(questionData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to submit question');
-    }
-    
-    // Reset form
-    questionForm.reset();
-    
-    // Show success message
-    showNotification('Question submitted successfully!', 'success');
-    
-    // Refresh questions list immediately
-    setTimeout(() => {
-      fetchQuestions();
-    }, 500);
-    
-  } catch (error) {
-    console.error('Error submitting question:', error);
-    showNotification(error.message || 'Error submitting question. Please try again.', 'error');
-  } finally {
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-});
-
-// Edit question
-window.editQuestion = async function(questionId) {
-  try {
-    console.log('✏️ Editing question:', questionId);
-    const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to load question');
-    }
-    
-    const question = await response.json();
-    console.log('✅ Loaded question for editing:', question);
-    
-    // Populate edit form
-    document.getElementById('edit-question-id').value = questionId;
-    document.getElementById('edit-question-title').value = question.title;
-    document.getElementById('edit-question-category').value = question.category;
-    document.getElementById('edit-question-description').value = question.description;
-    document.getElementById('edit-question-code').value = question.code || '';
-    
-    // Show edit form, hide new question form
-    questionForm.classList.add('hidden');
-    editQuestionForm.classList.remove('hidden');
-  } catch (error) {
-    console.error('❌ Error loading question for edit:', error);
-    showNotification('Error loading question for editing: ' + error.message, 'error');
-  }
-};
-
-// Update question
-editQuestionForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const questionId = document.getElementById('edit-question-id').value;
-  const submitBtn = editQuestionForm.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  
-  submitBtn.innerHTML = 'Updating...';
-  submitBtn.disabled = true;
-
-  try {
-    const updatedData = {
-      title: document.getElementById('edit-question-title').value,
-      category: document.getElementById('edit-question-category').value,
-      description: document.getElementById('edit-question-description').value,
-      code: document.getElementById('edit-question-code').value,
-      userId: currentUser.uid
-    };
-
-    console.log('📤 Updating question:', updatedData);
-    const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update question');
-    }
-    
-    // Switch back to new question form and refresh questions
-    cancelEdit();
-    fetchQuestions();
-    showNotification('Question updated successfully!', 'success');
-  } catch (error) {
-    console.error('❌ Error updating question:', error);
-    showNotification('Error updating question: ' + error.message, 'error');
-  } finally {
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-});
-
-// Delete question
-window.deleteQuestion = async function(questionId) {
-  if (confirm('Are you sure you want to delete this question?')) {
-    try {
-      console.log('🗑️ Deleting question:', questionId);
-      const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: currentUser.uid }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete question');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update comment');
+        }
+        
+        await loadComments(currentQuestionId);
+        
+        editingCommentId = null;
+        showNotification('Comment updated successfully!', 'success');
+        
+      } catch (error) {
+        showNotification('Error updating comment: ' + error.message, 'error');
       }
-      
-      showNotification('Question deleted successfully!', 'success');
-      fetchQuestions();
-    } catch (error) {
-      console.error('❌ Error deleting question:', error);
-      showNotification('Error deleting question: ' + error.message, 'error');
-    }
-  }
-};
+    };
 
-// Cancel edit
-document.getElementById('cancel-edit').addEventListener('click', cancelEdit);
-document.getElementById('delete-question').addEventListener('click', function() {
-  const questionId = document.getElementById('edit-question-id').value;
-  deleteQuestion(questionId);
-  cancelEdit();
-});
 
-function cancelEdit() {
-  editQuestionForm.classList.add('hidden');
-  questionForm.classList.remove('hidden');
-  editQuestionForm.reset();
-}
 
-// Clear form
-document.getElementById('clear-form').addEventListener('click', () => {
-  questionForm.reset();
-});
 
-// Logout
-logoutBtn.addEventListener('click', () => {
-  if (pollInterval) clearInterval(pollInterval);
-  auth.signOut().then(() => {
-    window.location.href = "index.html";
-  });
-});
+    window.cancelCommentEdit = function(commentId) {
+      editingCommentId = null;
+      loadComments(currentQuestionId);
+    };
 
-// Utility functions
-function getCategoryColor(category) {
-  const colors = {
-    'web-development': 'bg-blue-500/20 text-blue-300',
-    'data-structures': 'bg-purple-500/20 text-purple-300',
-    'algorithms': 'bg-emerald-500/20 text-emerald-300',
-    'database': 'bg-amber-500/20 text-amber-300',
-    'college': 'bg-rose-500/20 text-rose-300',
-    'other': 'bg-slate-500/20 text-slate-300'
-  };
-  return colors[category] || colors.other;
-}
 
-function getCategoryLabel(category) {
-  const labels = {
-    'web-development': 'Web Development',
-    'data-structures': 'Data Structures',
-    'algorithms': 'Algorithms',
-    'database': 'Database',
-    'college': 'College',
-    'other': 'Other'
-  };
-  return labels[category] || 'Other';
-}
 
-function formatDate(date) {
-  if (!date) return '';
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
-}
 
-function formatTime(date) {
-  if (!date) return '';
-  return date.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-}
+    window.deleteComment = async function(commentId) {
+      if (confirm('Are you sure you want to delete this comment?')) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: currentUser.uid }),
+          });
 
-function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function showNotification(message, type = 'info') {
-  const existingNotification = document.querySelector('.notification');
-  if (existingNotification) {
-    existingNotification.remove();
-  }
-
-  const notification = document.createElement('div');
-  notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-    type === 'success' ? 'bg-emerald-600 text-white' :
-    type === 'error' ? 'bg-rose-600 text-white' :
-    'bg-slate-700 text-white'
-  }`;
-  notification.textContent = message;
-
-  document.body.appendChild(notification);
-
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
-}
-
-// Close modal on outside click
-commentModal.addEventListener('click', (e) => {
-  if (e.target === commentModal) {
-    commentModal.classList.add('hidden');
-    editingCommentId = null;
-  }
-});
-
-// Debug function to check all questions
-window.debugQuestions = async function() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/debug/questions`);
-    const data = await response.json();
-    console.log('🔍 Debug questions:', data);
-    showNotification(`Found ${data.count} questions in database`, 'info');
-  } catch (error) {
-    console.error('Debug error:', error);
-  }
-};
-
-// Prevent form submission on Enter key in textareas
-document.querySelectorAll('textarea').forEach(textarea => {
-  textarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      e.preventDefault();
-      const form = textarea.closest('form');
-      if (form) {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.click();
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete comment');
+          }
+          
+          const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+          if (commentElement) {
+            commentElement.remove();
+          }
+          
+          if (commentsContainer.children.length === 0) {
+            noComments.classList.remove('hidden');
+          }
+          
+          showNotification('Comment deleted successfully!', 'success');
+          
+        } catch (error) {
+          showNotification('Error deleting comment: ' + error.message, 'error');
         }
       }
+    };
+
+
+
+
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const text = commentText.value.trim();
+      if (!text) return;
+      
+      const submitBtn = commentForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = 'Sending...';
+      submitBtn.disabled = true;
+
+      try {
+        const commentData = {
+          text: text,
+          userId: currentUser.uid,
+          userName: currentUser.displayName || currentUser.email,
+          userEmail: currentUser.email,
+          userPhotoURL: currentUser.photoURL || '',
+          questionId: currentQuestionId
+        };
+
+        const response = await fetch(`${API_BASE_URL}/comments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to submit comment');
+        }
+        
+        commentText.value = '';
+        await loadComments(currentQuestionId);
+        
+        showNotification('Comment added successfully!', 'success');
+        
+      } catch (error) {
+        showNotification('Error submitting comment: ' + error.message, 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+
+
+
+    closeCommentModal.addEventListener('click', () => {
+      commentModal.classList.add('hidden');
+      editingCommentId = null;
+    });
+
+
+
+
+    questionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submit-question');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = `
+        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        Submitting...
+      `;
+      submitBtn.disabled = true;
+
+      try {
+        const questionData = {
+          title: document.getElementById('question-title').value,
+          category: document.getElementById('question-category').value,
+          description: document.getElementById('question-description').value,
+          code: document.getElementById('question-code').value,
+          userId: currentUser.uid,
+          userName: currentUser.displayName || currentUser.email,
+          userEmail: currentUser.email,
+          userPhotoURL: currentUser.photoURL || ''
+        };
+
+        const response = await fetch(`${API_BASE_URL}/questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(questionData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to submit question');
+        }
+        
+        questionForm.reset();
+        
+        showNotification('Question submitted successfully!', 'success');
+        
+        setTimeout(() => {
+          fetchQuestions();
+        }, 500);
+        
+      } catch (error) {
+        showNotification(error.message || 'Error submitting question. Please try again.', 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+
+
+
+    window.editQuestion = async function(questionId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to load question');
+        }
+        
+        const question = await response.json();
+        
+        document.getElementById('edit-question-id').value = questionId;
+        document.getElementById('edit-question-title').value = question.title;
+        document.getElementById('edit-question-category').value = question.category;
+        document.getElementById('edit-question-description').value = question.description;
+        document.getElementById('edit-question-code').value = question.code || '';
+        
+        questionForm.classList.add('hidden');
+        editQuestionForm.classList.remove('hidden');
+      } catch (error) {
+        showNotification('Error loading question for editing: ' + error.message, 'error');
+      }
+    };
+
+
+
+
+    editQuestionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const questionId = document.getElementById('edit-question-id').value;
+      const submitBtn = editQuestionForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = 'Updating...';
+      submitBtn.disabled = true;
+
+      try {
+        const updatedData = {
+          title: document.getElementById('edit-question-title').value,
+          category: document.getElementById('edit-question-category').value,
+          description: document.getElementById('edit-question-description').value,
+          code: document.getElementById('edit-question-code').value,
+          userId: currentUser.uid
+        };
+
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update question');
+        }
+        
+        cancelEdit();
+        fetchQuestions();
+        showNotification('Question updated successfully!', 'success');
+      } catch (error) {
+        showNotification('Error updating question: ' + error.message, 'error');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+
+
+
+    window.deleteQuestion = async function(questionId) {
+      if (confirm('Are you sure you want to delete this question?')) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: currentUser.uid }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete question');
+          }
+          
+          showNotification('Question deleted successfully!', 'success');
+          fetchQuestions();
+        } catch (error) {
+          showNotification('Error deleting question: ' + error.message, 'error');
+        }
+      }
+    };
+
+
+
+
+    document.getElementById('cancel-edit').addEventListener('click', cancelEdit);
+    document.getElementById('delete-question').addEventListener('click', function() {
+      const questionId = document.getElementById('edit-question-id').value;
+      deleteQuestion(questionId);
+      cancelEdit();
+    });
+
+    function cancelEdit() {
+      editQuestionForm.classList.add('hidden');
+      questionForm.classList.remove('hidden');
+      editQuestionForm.reset();
     }
-  });
-});
+
+
+
+
+    document.getElementById('clear-form').addEventListener('click', () => {
+      questionForm.reset();
+    });
+
+
+
+
+    logoutBtn.addEventListener('click', () => {
+      if (pollInterval) clearInterval(pollInterval);
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    });
+
+
+
+
+    function getCategoryColor(category) {
+      const colors = {
+        'web-development': 'bg-blue-500/20 text-blue-300',
+        'data-structures': 'bg-purple-500/20 text-purple-300',
+        'algorithms': 'bg-emerald-500/20 text-emerald-300',
+        'database': 'bg-amber-500/20 text-amber-300',
+        'college': 'bg-rose-500/20 text-rose-300',
+        'other': 'bg-slate-500/20 text-slate-300'
+      };
+      return colors[category] || colors.other;
+    }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        'web-development': 'Web Development',
+        'data-structures': 'Data Structures',
+        'algorithms': 'Algorithms',
+        'database': 'Database',
+        'college': 'College',
+        'other': 'Other'
+      };
+      return labels[category] || 'Other';
+    }
+
+    function formatDate(date) {
+      if (!date) return '';
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+
+    function formatTime(date) {
+      if (!date) return '';
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showNotification(message, type = 'info') {
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      const notification = document.createElement('div');
+      notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-emerald-600 text-white' :
+        type === 'error' ? 'bg-rose-600 text-white' :
+        'bg-slate-700 text-white'
+      }`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    commentModal.addEventListener('click', (e) => {
+      if (e.target === commentModal) {
+        commentModal.classList.add('hidden');
+        editingCommentId = null;
+      }
+    });
+
+    document.querySelectorAll('textarea').forEach(textarea => {
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+          e.preventDefault();
+          const form = textarea.closest('form');
+          if (form) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              submitBtn.click();
+            }
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>

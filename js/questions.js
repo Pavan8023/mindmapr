@@ -17,7 +17,7 @@ class QuestionManager {
 
     setupQuestionsListener() {
         this.fetchQuestions();
-        
+
         if (this.pollInterval) clearInterval(this.pollInterval);
         this.pollInterval = setInterval(() => this.fetchQuestions(), 3000);
     }
@@ -26,41 +26,80 @@ class QuestionManager {
         try {
             const category = document.getElementById('category-filter').value;
             const sort = document.getElementById('sort-questions').value;
-            
-            const response = await fetch(`${API_BASE_URL}/questions?category=${category}&sort=${sort}`);
-            
+
+            const qsCategory = encodeURIComponent(category);
+            const qsSort = encodeURIComponent(sort);
+
+            const response = await fetch(
+                `${API_BASE_URL}/questions?category=${qsCategory}&sort=${qsSort}`
+            );
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            const questions = await response.json();
-            
-            document.getElementById('loading-questions').classList.add('hidden');
-            document.getElementById('questions-container').innerHTML = '';
-            
-            if (questions.length === 0) {
-                document.getElementById('questions-container').innerHTML = this.getEmptyStateHTML();
+
+            let questions = await response.json();
+
+            const loadingEl = document.getElementById('loading-questions');
+            const containerEl = document.getElementById('questions-container');
+
+            loadingEl.classList.add('hidden');
+            containerEl.innerHTML = '';
+
+            if (!questions || questions.length === 0) {
+                containerEl.innerHTML = this.getEmptyStateHTML();
                 return;
             }
-            
-            questions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
+
+            // client-side sorting fallback (in case server doesn’t sort)
+            questions = this.sortQuestionsClientSide(questions, sort);
+
             questions.forEach((question) => {
                 this.displayQuestion(question._id, question);
             });
         } catch (error) {
+            console.error('Error fetching questions:', error);
             this.showErrorState();
         }
+    }
+
+    // respect dropdown sort option
+    sortQuestionsClientSide(questions, sort) {
+        if (!Array.isArray(questions)) return [];
+
+        const safeDate = (q) => (q.createdAt ? new Date(q.createdAt) : new Date(0));
+
+        if (sort === 'oldest') {
+            return questions.sort(
+                (a, b) => safeDate(a) - safeDate(b)
+            );
+        }
+
+        if (sort === 'category') {
+            return questions.sort((a, b) => {
+                const catA = (a.category || '').toLowerCase();
+                const catB = (b.category || '').toLowerCase();
+                if (catA < catB) return -1;
+                if (catA > catB) return 1;
+                // if same category → newest first
+                return safeDate(b) - safeDate(a);
+            });
+        }
+
+        // default or "newest"
+        return questions.sort(
+            (a, b) => safeDate(b) - safeDate(a)
+        );
     }
 
     displayQuestion(id, question) {
         const questionElement = document.createElement('div');
         questionElement.className = 'bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition';
         questionElement.setAttribute('data-question-id', id);
-        
+
         const questionDate = question.createdAt ? new Date(question.createdAt) : new Date();
         const currentUser = this.authManager.getCurrentUser();
-        
+
         questionElement.innerHTML = this.getQuestionHTML(id, question, questionDate, currentUser);
         document.getElementById('questions-container').appendChild(questionElement);
     }
@@ -120,10 +159,10 @@ class QuestionManager {
 
     async submitQuestion(e) {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submit-question');
         const originalText = submitBtn.innerHTML;
-        
+
         submitBtn.innerHTML = `
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             Submitting...
@@ -155,14 +194,14 @@ class QuestionManager {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to submit question');
             }
-            
+
             this.clearForm();
             Utils.showNotification('Question submitted successfully!', 'success');
-            
+
             setTimeout(() => {
                 this.fetchQuestions();
             }, 500);
-            
+
         } catch (error) {
             Utils.showNotification(error.message || 'Error submitting question. Please try again.', 'error');
         } finally {
@@ -174,20 +213,20 @@ class QuestionManager {
     async editQuestion(questionId) {
         try {
             const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to load question');
             }
-            
+
             const question = await response.json();
-            
+
             document.getElementById('edit-question-id').value = questionId;
             document.getElementById('edit-question-title').value = question.title;
             document.getElementById('edit-question-category').value = question.category;
             document.getElementById('edit-question-description').value = question.description;
             document.getElementById('edit-question-code').value = question.code || '';
-            
+
             document.getElementById('question-form').classList.add('hidden');
             document.getElementById('edit-question-form').classList.remove('hidden');
         } catch (error) {
@@ -197,11 +236,11 @@ class QuestionManager {
 
     async updateQuestion(e) {
         e.preventDefault();
-        
+
         const questionId = document.getElementById('edit-question-id').value;
         const submitBtn = document.querySelector('#edit-question-form button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        
+
         submitBtn.innerHTML = 'Updating...';
         submitBtn.disabled = true;
 
@@ -227,7 +266,7 @@ class QuestionManager {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update question');
             }
-            
+
             this.cancelEdit();
             this.fetchQuestions();
             Utils.showNotification('Question updated successfully!', 'success');
@@ -255,7 +294,7 @@ class QuestionManager {
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Failed to delete question');
                 }
-                
+
                 Utils.showNotification('Question deleted successfully!', 'success');
                 this.fetchQuestions();
             } catch (error) {

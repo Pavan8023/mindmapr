@@ -39,25 +39,7 @@ class CommentManager {
         }
     }
 
-    getQuestionContentHTML(question) {
-        return `
-            <div class="bg-slate-700/50 rounded-lg p-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${Utils.getCategoryColor(question.category)}">
-                        ${Utils.getCategoryLabel(question.category)}
-                    </span>
-                    <span class="text-sm text-slate-300">by ${question.userName || question.userEmail}</span>
-                </div>
-                <h4 class="font-semibold text-white mb-2 mobile-text-sm">${question.title}</h4>
-                <p class="text-slate-300 text-sm mobile-text-sm">${question.description}</p>
-                ${question.code ? `
-                    <div class="bg-slate-800 rounded p-3 mt-3">
-                        <pre class="text-xs text-emerald-400 font-mono overflow-x-auto"><code>${Utils.escapeHtml(question.code)}</code></pre>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    }
+    
 
     async loadComments(questionId) {
         try {

@@ -17,7 +17,27 @@ class CommentManager {
         });
     }
 
-    
+    async openComments(questionId) {
+        try {
+            this.currentQuestionId = questionId;
+            document.getElementById('comment-question-id').value = questionId;
+            this.editingCommentId = null;
+            
+            const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to load question');
+            }
+            
+            const question = await response.json();
+            document.getElementById('comment-question-content').innerHTML = this.getQuestionContentHTML(question);
+            await this.loadComments(questionId);
+            document.getElementById('comment-modal').classList.remove('hidden');
+            document.getElementById('comment-text').focus();
+        } catch (error) {
+            Utils.showNotification('Error loading comments: ' + error.message, 'error');
+        }
+    }
 
     getQuestionContentHTML(question) {
         return `

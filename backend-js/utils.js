@@ -1,4 +1,4 @@
-
+const API_BASE_URL = 'https://mindmapr.onrender.com/api';
 
 class Utils {
     static getCategoryColor(category) {

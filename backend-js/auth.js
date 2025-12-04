@@ -43,5 +43,52 @@ class AuthManager {
         }
     }
 
-    
+    setupAuthListener(callback) {
+        this.auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // Ensure presence is cleaned up when no user is found
+                if (this.presenceManager) {
+                    this.presenceManager.forceCleanup();
+                }
+                window.location.href = "index.html";
+            } else {
+                this.currentUser = user;
+                this.loadUserData(user);
+                callback(user);
+            }
+        });
+    }
+
+    logout() {
+        console.log('Logging out user...');
+        
+        // Clear any polling intervals
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+        }
+        
+        // Force cleanup of presence before signing out
+        if (this.presenceManager) {
+            this.presenceManager.forceCleanup();
+        }
+        
+        // Sign out from Firebase Auth
+        this.auth.signOut().then(() => {
+            console.log('User signed out successfully');
+            window.location.href = "index.html";
+        }).catch((error) => {
+            console.error('Error signing out:', error);
+            window.location.href = "index.html";
+        });
+    }
+
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    // Method to set presence manager reference
+    setPresenceManager(presenceManager) {
+        this.presenceManager = presenceManager;
+    }
 }

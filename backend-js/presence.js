@@ -104,5 +104,116 @@ class PresenceManager {
         });
     }
 
-    
+    updateOnlineCounter(count) {
+        const onlineCountElement = document.getElementById('online-count');
+        const liveUsersElement = document.getElementById('live-users');
+        
+        if (onlineCountElement) {
+            onlineCountElement.textContent = count;
+        }
+        
+        // Update visual indicator based on count
+        if (liveUsersElement) {
+            if (count === 0) {
+                liveUsersElement.classList.remove('bg-green-600/20', 'border-green-500/30');
+                liveUsersElement.classList.add('bg-slate-600/20', 'border-slate-500/30');
+            } else {
+                liveUsersElement.classList.remove('bg-slate-600/20', 'border-slate-500/30');
+                liveUsersElement.classList.add('bg-green-600/20', 'border-green-500/30');
+            }
+        }
+    }
+
+    setupActivityListeners() {
+        const activityEvents = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart', 'mousedown'];
+        
+        activityEvents.forEach(event => {
+            document.addEventListener(event, () => this.handleUserActivity(), { passive: true });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.handleUserActivity();
+            }
+        });
+
+        // Also update activity periodically (every 30 seconds) to handle background tabs
+        this.activityInterval = setInterval(() => {
+            this.updateLastActive();
+        }, 30000);
+    }
+
+    handleUserActivity() {
+        this.resetIdleTimer();
+        this.updateLastActive();
+    }
+
+    updateLastActive() {
+        if (this.userId && this.isOnline && this.userStatusRef) {
+            this.userStatusRef.update({
+                lastActive: Date.now(),
+                lastUpdated: Date.now()
+            }).catch((error) => {
+                console.error('Error updating last active:', error);
+            });
+        }
+    }
+
+    resetIdleTimer() {
+        this.clearTimers();
+        
+        if (this.isOnline) {
+            // Set warning at 14 minutes (1 minute before logout)
+            this.warningTimer = setTimeout(() => {
+                this.showIdleWarning();
+            }, this.idleTimeout - 60000);
+
+            // Set logout at 15 minutes
+            this.idleTimer = setTimeout(() => {
+                this.handleIdleTimeout();
+            }, this.idleTimeout);
+        }
+    }
+
+    showIdleWarning() {
+        Utils.showNotification('You will be logged out due to inactivity in 1 minute', 'warning');
+    }
+
+    handleIdleTimeout() {
+        console.log('User idle for 15 minutes, logging out...');
+        Utils.showNotification('You have been logged out due to inactivity', 'info');
+        this.setUserOffline(); // Ensure user is marked offline
+        this.authManager.logout();
+    }
+
+    clearTimers() {
+        if (this.idleTimer) {
+            clearTimeout(this.idleTimer);
+            this.idleTimer = null;
+        }
+        if (this.warningTimer) {
+            clearTimeout(this.warningTimer);
+            this.warningTimer = null;
+        }
+    }
+
+    cleanup() {
+        this.clearTimers();
+        
+        // Clear activity interval
+        if (this.activityInterval) {
+            clearInterval(this.activityInterval);
+            this.activityInterval = null;
+        }
+        
+        this.userId = null;
+        this.isOnline = false;
+        this.userStatusRef = null;
+    }
+
+    // Method to manually trigger cleanup (called from auth manager during logout)
+    forceCleanup() {
+        this.setUserOffline();
+        this.cleanup();
+    }
 }

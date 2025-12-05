@@ -92,6 +92,75 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Update question
+router.put('/:id', async (req, res) => {
+  try {
+    console.log('📝 PUT Update Question:', req.params.id);
+    
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid question ID' });
+    }
 
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Check if user owns the question
+    if (question.userId !== req.body.userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      req.params.id,
+      { 
+        title: req.body.title,
+        category: req.body.category,
+        description: req.body.description,
+        code: req.body.code,
+        updatedAt: new Date() 
+      },
+      { new: true }
+    );
+    
+    res.json(updatedQuestion);
+  } catch (error) {
+    console.error('❌ Error updating question:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Delete question
+router.delete('/:id', async (req, res) => {
+  try {
+    console.log('🗑️ DELETE Question:', req.params.id);
+    
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid question ID' });
+    }
+
+    const { userId } = req.body;
+    const question = await Question.findById(req.params.id);
+    
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Check if user owns the question
+    if (question.userId !== userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Delete all comments associated with the question
+    await Comment.deleteMany({ questionId: req.params.id });
+    
+    // Delete the question
+    await Question.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Question deleted successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting question:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;

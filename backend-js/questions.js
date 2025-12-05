@@ -210,7 +210,114 @@ class QuestionManager {
         }
     }
 
-    
+    async editQuestion(questionId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to load question');
+            }
+
+            const question = await response.json();
+
+            document.getElementById('edit-question-id').value = questionId;
+            document.getElementById('edit-question-title').value = question.title;
+            document.getElementById('edit-question-category').value = question.category;
+            document.getElementById('edit-question-description').value = question.description;
+            document.getElementById('edit-question-code').value = question.code || '';
+
+            document.getElementById('question-form').classList.add('hidden');
+            document.getElementById('edit-question-form').classList.remove('hidden');
+        } catch (error) {
+            Utils.showNotification('Error loading question for editing: ' + error.message, 'error');
+        }
+    }
+
+    async updateQuestion(e) {
+        e.preventDefault();
+
+        const questionId = document.getElementById('edit-question-id').value;
+        const submitBtn = document.querySelector('#edit-question-form button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.innerHTML = 'Updating...';
+        submitBtn.disabled = true;
+
+        try {
+            const currentUser = this.authManager.getCurrentUser();
+            const updatedData = {
+                title: document.getElementById('edit-question-title').value,
+                category: document.getElementById('edit-question-category').value,
+                description: document.getElementById('edit-question-description').value,
+                code: document.getElementById('edit-question-code').value,
+                userId: currentUser.uid
+            };
+
+            const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update question');
+            }
+
+            this.cancelEdit();
+            this.fetchQuestions();
+            Utils.showNotification('Question updated successfully!', 'success');
+        } catch (error) {
+            Utils.showNotification('Error updating question: ' + error.message, 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    async deleteQuestion(questionId) {
+        if (confirm('Are you sure you want to delete this question?')) {
+            try {
+                const currentUser = this.authManager.getCurrentUser();
+                const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: currentUser.uid }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete question');
+                }
+
+                Utils.showNotification('Question deleted successfully!', 'success');
+                this.fetchQuestions();
+            } catch (error) {
+                Utils.showNotification('Error deleting question: ' + error.message, 'error');
+            }
+        }
+    }
+
+    deleteQuestionHandler() {
+        const questionId = document.getElementById('edit-question-id').value;
+        this.deleteQuestion(questionId);
+        this.cancelEdit();
+    }
+
+    cancelEdit() {
+        document.getElementById('edit-question-form').classList.add('hidden');
+        document.getElementById('question-form').classList.remove('hidden');
+        document.getElementById('edit-question-form').reset();
+    }
+
+    clearForm() {
+        document.getElementById('question-form').reset();
+    }
 
     getEmptyStateHTML() {
         return `

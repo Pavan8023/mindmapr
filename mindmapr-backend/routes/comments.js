@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const Comment = require('../models/comments');
 const router = express.Router();
 
